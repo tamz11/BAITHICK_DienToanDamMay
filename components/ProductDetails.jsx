@@ -14,6 +14,7 @@ const ProductDetails = ({ product }) => {
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$';
 
     const cart = useSelector(state => state.cart.cartItems);
+    const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
     const dispatch = useDispatch();
 
     const router = useRouter()
@@ -22,6 +23,18 @@ const ProductDetails = ({ product }) => {
 
     const addToCartHandler = () => {
         dispatch(addToCart({ productId }))
+    }
+
+    const handleCartClick = () => {
+        if (!isLoggedIn) {
+            return router.push(`/login?redirect=/product/${productId}`)
+        }
+
+        if (!cart[productId]) {
+            addToCartHandler()
+        } else {
+            router.push('/cart')
+        }
     }
 
     const averageRating = product.rating.reduce((acc, item) => acc + item.rating, 0) / product.rating.length;
@@ -65,7 +78,7 @@ const ProductDetails = ({ product }) => {
                             </div>
                         )
                     }
-                    <button onClick={() => !cart[productId] ? addToCartHandler() : router.push('/cart')} className="bg-slate-800 text-white px-10 py-3 text-sm font-medium rounded hover:bg-slate-900 active:scale-95 transition">
+                    <button onClick={handleCartClick} className="bg-slate-800 text-white px-10 py-3 text-sm font-medium rounded hover:bg-slate-900 active:scale-95 transition">
                         {!cart[productId] ? 'Add to Cart' : 'View Cart'}
                     </button>
                 </div>

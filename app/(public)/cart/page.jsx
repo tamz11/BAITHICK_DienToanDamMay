@@ -7,6 +7,7 @@ import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 
 export default function Cart() {
 
@@ -14,8 +15,10 @@ export default function Cart() {
     
     const { cartItems } = useSelector(state => state.cart);
     const products = useSelector(state => state.product.list);
+    const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
 
     const dispatch = useDispatch();
+    const router = useRouter();
 
     const [cartArray, setCartArray] = useState([]);
     const [totalPrice, setTotalPrice] = useState(0);
@@ -41,10 +44,23 @@ export default function Cart() {
     }
 
     useEffect(() => {
+        if (!isLoggedIn) {
+            router.push('/login?redirect=/cart');
+            return;
+        }
+
         if (products.length > 0) {
             createCartArray();
         }
-    }, [cartItems, products]);
+    }, [cartItems, products, isLoggedIn, router]);
+
+    if (!isLoggedIn) {
+        return (
+            <div className="min-h-screen mx-6 flex items-center justify-center text-slate-500">
+                <p>Vui lòng đăng nhập để xem giỏ hàng...</p>
+            </div>
+        );
+    }
 
     return cartArray.length > 0 ? (
         <div className="min-h-screen mx-6 text-slate-800">

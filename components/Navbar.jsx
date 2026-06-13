@@ -10,6 +10,7 @@ const Navbar = () => {
     const router = useRouter();
 
     const [search, setSearch] = useState('')
+    const isLoggedIn = useSelector(state => state.auth.isLoggedIn)
     const cartCount = useSelector(state => state.cart.total)
 
     const handleSearch = (e) => {
@@ -41,23 +42,31 @@ const Navbar = () => {
                             <input className="w-full bg-transparent outline-none placeholder-slate-600" type="text" placeholder="Search products" value={search} onChange={(e) => setSearch(e.target.value)} required />
                         </form>
 
-                        <Link href="/cart" className="relative flex items-center gap-2 text-slate-600">
-                            <ShoppingCart size={18} />
-                            Cart
-                            <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</button>
-                        </Link>
+                        {isLoggedIn ? (
+                            <Link href="/cart" className="relative flex items-center gap-2 text-slate-600">
+                                <ShoppingCart size={18} />
+                                Cart
+                                <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</button>
+                            </Link>
+                        ) : (
+                            <button type="button" onClick={() => router.push('/login?redirect=/cart')} className="relative flex items-center gap-2 text-slate-600">
+                                <ShoppingCart size={18} />
+                                Cart
+                                <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</button>
+                            </button>
+                        )}
 
-                        <button className="px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full">
+                        <Link href="/login" className="px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full">
                             Login
-                        </button>
+                        </Link>
 
                     </div>
 
                     {/* Mobile User Button  */}
                     <div className="sm:hidden">
-                        <button className="px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full">
+                        <Link href="/login" className="px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full">
                             Login
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

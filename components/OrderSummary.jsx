@@ -12,6 +12,7 @@ const OrderSummary = ({ totalPrice, items }) => {
     const router = useRouter();
 
     const addressList = useSelector(state => state.address.list);
+    const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
 
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -26,6 +27,11 @@ const OrderSummary = ({ totalPrice, items }) => {
 
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
+
+        if (!isLoggedIn) {
+            router.push('/login?redirect=/cart')
+            return;
+        }
 
         router.push('/orders')
     }
