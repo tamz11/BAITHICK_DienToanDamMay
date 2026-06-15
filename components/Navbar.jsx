@@ -1,21 +1,27 @@
 'use client'
-import { Search, ShoppingCart } from "lucide-react";
+import { Search, ShoppingCart, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSelector } from "react-redux";
+import { useSession, signOut } from "next-auth/react";
 
 const Navbar = () => {
 
     const router = useRouter();
+    const { data: session } = useSession();
 
     const [search, setSearch] = useState('')
-    const isLoggedIn = useSelector(state => state.auth.isLoggedIn)
     const cartCount = useSelector(state => state.cart.total)
 
     const handleSearch = (e) => {
         e.preventDefault()
         router.push(`/shop?search=${search}`)
+    }
+
+    const handleLogout = async () => {
+        await signOut({ redirect: false });
+        router.push('/');
     }
 
     return (
@@ -42,31 +48,46 @@ const Navbar = () => {
                             <input className="w-full bg-transparent outline-none placeholder-slate-600" type="text" placeholder="Tìm kiếm sản phẩm" value={search} onChange={(e) => setSearch(e.target.value)} required />
                         </form>
 
-                        {isLoggedIn ? (
-                            <Link href="/cart" className="relative flex items-center gap-2 text-slate-600">
-                                <ShoppingCart size={18} />
-                                Giỏ hàng
-                                <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</button>
-                            </Link>
+                        {session ? (
+                            <>
+                                <Link href="/cart" className="relative flex items-center gap-2 text-slate-600">
+                                    <ShoppingCart size={18} />
+                                    Giỏ hàng
+                                    <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</button>
+                                </Link>
+                                <Link href="/profile" className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition">
+                                    <User size={18} />
+                                </Link>
+                                <button onClick={handleLogout} className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-red-100 transition">
+                                    <LogOut size={18} />
+                                </button>
+                            </>
                         ) : (
-                            <button type="button" onClick={() => router.push('/login?redirect=/cart')} className="relative flex items-center gap-2 text-slate-600">
-                                <ShoppingCart size={18} />
-                                Giỏ hàng
-                                <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</button>
-                            </button>
+                            <>
+                                <button type="button" onClick={() => router.push('/login?redirect=/cart')} className="relative flex items-center gap-2 text-slate-600">
+                                    <ShoppingCart size={18} />
+                                    Giỏ hàng
+                                    <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</button>
+                                </button>
+                                <Link href="/login" className="px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full">
+                                    Đăng nhập
+                                </Link>
+                            </>
                         )}
-
-                        <Link href="/login" className="px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full">
-                            Đăng nhập
-                        </Link>
 
                     </div>
 
                     {/* Mobile User Button  */}
                     <div className="sm:hidden">
-                        <Link href="/login" className="px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full">
-                            Đăng nhập
-                        </Link>
+                        {session ? (
+                            <button onClick={handleLogout} className="px-7 py-1.5 bg-red-500 hover:bg-red-600 text-sm transition text-white rounded-full">
+                                Đăng xuất
+                            </button>
+                        ) : (
+                            <Link href="/login" className="px-7 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-sm transition text-white rounded-full">
+                                Đăng nhập
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>

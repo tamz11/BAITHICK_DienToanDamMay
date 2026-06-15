@@ -7,6 +7,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Counter from "./Counter";
 import { useDispatch, useSelector } from "react-redux";
+import { useSession } from "next-auth/react";
 
 const ProductDetails = ({ product }) => {
 
@@ -14,7 +15,7 @@ const ProductDetails = ({ product }) => {
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$';
 
     const cart = useSelector(state => state.cart.cartItems);
-    const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
+    const { data: session } = useSession();
     const dispatch = useDispatch();
 
     const router = useRouter()
@@ -26,7 +27,7 @@ const ProductDetails = ({ product }) => {
     }
 
     const handleCartClick = () => {
-        if (!isLoggedIn) {
+        if (!session) {
             return router.push(`/login?redirect=/product/${productId}`)
         }
 

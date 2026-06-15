@@ -1,27 +1,66 @@
 'use client'
 import Link from "next/link";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
-import { login } from "@/lib/features/auth/authSlice";
+import toast from "react-hot-toast";
+import { signIn } from "next-auth/react";
 
 export default function SignupPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [loading, setLoading] = useState(false);
 
-    const dispatch = useDispatch();
     const router = useRouter();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        
         if (password !== confirmPassword) {
-            window.alert('Mật khẩu xác nhận không khớp');
+            toast.error('Mật khẩu xác nhận không khớp');
             return;
         }
-        dispatch(login({ name, email }));
-        router.push('/');
+
+        if (password.length < 6) {
+            toast.error('Mật khẩu phải ít nhất 6 ký tự');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            // Signup
+            const signupRes = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password, confirmPassword }),
+            });
+
+            if (!signupRes.ok) {
+                const data = await signupRes.json();
+                throw new Error(data.error || 'Đăng ký thất bại');
+            }
+
+            toast.success('Đăng ký thành công! Đang đăng nhập...');
+
+            // Auto login after signup
+            const loginResult = await signIn('credentials', {
+                email,
+                password,
+                redirect: false,
+            });
+
+            if (loginResult?.ok) {
+                router.push('/');
+            } else {
+                router.push('/login');
+            }
+        } catch (error) {
+            toast.error(error.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -38,7 +77,8 @@ export default function SignupPage() {
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             required
-                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                            disabled={loading}
+                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
                             placeholder="Nguyễn Văn A"
                         />
                     </label>
@@ -50,7 +90,8 @@ export default function SignupPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                            disabled={loading}
+                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
                             placeholder="you@example.com"
                         />
                     </label>
@@ -62,7 +103,8 @@ export default function SignupPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                            disabled={loading}
+                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
                             placeholder="Tạo mật khẩu"
                         />
                     </label>
@@ -74,16 +116,18 @@ export default function SignupPage() {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
-                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                            disabled={loading}
+                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
                             placeholder="Nhập lại mật khẩu"
                         />
                     </label>
 
                     <button
                         type="submit"
-                        className="w-full rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                        disabled={loading}
+                        className="w-full rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:bg-indigo-400"
                     >
-                        Đăng ký
+                        {loading ? 'Đang đăng ký...' : 'Đăng ký'}
                     </button>
                 </form>
 
