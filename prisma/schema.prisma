@@ -14,7 +14,9 @@ model User {
     id    String @id
     name  String
     email String
+    password String
     image String
+    role  Role   @default(CUSTOMER)
     cart  Json   @default("{}")
 
     // Relations
@@ -54,6 +56,13 @@ enum OrderStatus {
 enum PaymentMethod {
     COD
     STRIPE
+}
+
+enum Role {
+    ADMIN
+    STORE_OWNER
+    STAFF
+    CUSTOMER
 }
 
 // Required for creating an Order: total, userId, storeId, addressId, isPaid, paymentMethod, isCouponUsed, coupon (JSON), orderItems (nested)

@@ -39,9 +39,9 @@ export default function StoreOrders() {
 
     return (
         <>
-            <h1 className="text-2xl text-slate-500 mb-5">Store <span className="text-slate-800 font-medium">Orders</span></h1>
+            <h1 className="text-2xl text-slate-500 mb-5">Đơn hàng <span className="text-slate-800 font-medium">của cửa hàng</span></h1>
             {orders.length === 0 ? (
-                <p>No orders found</p>
+                <p>Không tìm thấy đơn hàng</p>
             ) : (
                 <div className="overflow-x-auto max-w-4xl rounded-md shadow border border-gray-200">
                     <table className="w-full text-sm text-left text-gray-600">
