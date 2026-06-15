@@ -1,0 +1,23 @@
+[
+  {
+    "id": "t_169",
+    "title": "Vấn đề giao hàng - đơn #cmemm75h5001jtat89016h1p3",
+    "user": { "id": "user_31dQbH27HVtovbs13X2cmqefddM", "name": "John Doe" },
+    "status": "OPEN",
+    "createdAt": "2025-08-25T09:15:03.929Z",
+    "messages": [
+      { "id": "m_1", "author": "John Doe", "text": "Đơn hàng của tôi chưa nhận được, trạng thái vẫn đang xử lý.", "createdAt": "2025-08-25T09:20:00.000Z" }
+    ]
+  },
+  {
+    "id": "t_170",
+    "title": "Yêu cầu đổi trả sản phẩm",
+    "user": { "id": "user_31dQbH27HVtovbs13X2cmqefddM", "name": "Jenny Wilson" },
+    "status": "IN_PROGRESS",
+    "createdAt": "2025-08-24T11:44:29.713Z",
+    "messages": [
+      { "id": "m_2", "author": "Jenny Wilson", "text": "Sản phẩm bị lỗi, muốn đổi trả.", "createdAt": "2025-08-24T11:50:00.000Z" },
+      { "id": "m_3", "author": "Staff", "text": "Chào Jenny, chúng tôi đã tiếp nhận yêu cầu. Vui lòng gửi hình ảnh lỗi.", "createdAt": "2025-08-24T11:55:00.000Z" }
+    ]
+  }
+]
