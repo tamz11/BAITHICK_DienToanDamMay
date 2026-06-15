@@ -1,10 +1,9 @@
 generator client {
-    provider        = "prisma-client-js"
-    previewFeatures = ["driverAdapters"]
+    provider = "prisma-client-js"
 }
 
 datasource db {
-    provider  = "postgresql"
+    provider  = "mysql"
     url       = env("DATABASE_URL")
     directUrl = env("DIRECT_URL")
 }
@@ -13,9 +12,9 @@ datasource db {
 model User {
     id    String @id
     name  String
-    email String
+    email String @unique
     password String
-    image String
+    image String @default("")
     role  Role   @default(CUSTOMER)
     cart  Json   @default("{}")
 
@@ -33,7 +32,7 @@ model Product {
     description String
     mrp         Float
     price       Float
-    images      String[]
+    images      String
     category    String
     inStock     Boolean  @default(true)
     storeId     String

@@ -4,15 +4,16 @@ import AddressModal from './AddressModal';
 import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 
 const OrderSummary = ({ totalPrice, items }) => {
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$';
 
     const router = useRouter();
+    const { data: session } = useSession();
 
     const addressList = useSelector(state => state.address.list);
-    const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
 
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -28,7 +29,7 @@ const OrderSummary = ({ totalPrice, items }) => {
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
 
-        if (!isLoggedIn) {
+        if (!session) {
             router.push('/login?redirect=/cart')
             return;
         }

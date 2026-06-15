@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 export default function Cart() {
 
@@ -15,7 +16,7 @@ export default function Cart() {
     
     const { cartItems } = useSelector(state => state.cart);
     const products = useSelector(state => state.product.list);
-    const isLoggedIn = useSelector(state => state.auth.isLoggedIn);
+    const { data: session } = useSession();
 
     const dispatch = useDispatch();
     const router = useRouter();
@@ -44,7 +45,7 @@ export default function Cart() {
     }
 
     useEffect(() => {
-        if (!isLoggedIn) {
+        if (!session) {
             router.push('/login?redirect=/cart');
             return;
         }
@@ -52,9 +53,9 @@ export default function Cart() {
         if (products.length > 0) {
             createCartArray();
         }
-    }, [cartItems, products, isLoggedIn, router]);
+    }, [cartItems, products, session, router]);
 
-    if (!isLoggedIn) {
+    if (!session) {
         return (
             <div className="min-h-screen mx-6 flex items-center justify-center text-slate-500">
                 <p>Vui lòng đăng nhập để xem giỏ hàng...</p>

@@ -1,23 +1,48 @@
 'use client'
 import Link from "next/link";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useRouter, useSearchParams } from "next/navigation";
-import { login } from "@/lib/features/auth/authSlice";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { getSession, signIn } from "next-auth/react";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [redirect, setRedirect] = useState('/');
 
-    const dispatch = useDispatch();
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const redirect = searchParams.get('redirect') || '/';
 
-    const handleSubmit = (e) => {
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const redirectParam = params.get('redirect');
+        setRedirect(redirectParam || '/');
+    }, []);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        dispatch(login({ email }));
-        router.push(redirect);
+        setLoading(true);
+
+        try {
+            const result = await signIn('credentials', {
+                email,
+                password,
+                redirect: false,
+            });
+
+            if (result?.error) {
+                toast.error(result.error);
+            } else if (result?.ok) {
+                toast.success('Đăng nhập thành công!');
+                const session = await getSession();
+                const destination = session?.user?.role === 'ADMIN' ? '/admin' : redirect;
+                router.push(destination);
+            }
+        } catch (error) {
+            toast.error('Lỗi đăng nhập');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -34,7 +59,8 @@ export default function LoginPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                            disabled={loading}
+                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
                             placeholder="you@example.com"
                         />
                     </label>
@@ -46,16 +72,18 @@ export default function LoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                            disabled={loading}
+                            className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
                             placeholder="Nhập mật khẩu"
                         />
                     </label>
 
                     <button
                         type="submit"
-                        className="w-full rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                        disabled={loading}
+                        className="w-full rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:bg-indigo-400"
                     >
-                        Đăng nhập
+                        {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                     </button>
                 </form>
 
