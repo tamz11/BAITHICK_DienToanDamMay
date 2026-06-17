@@ -39,7 +39,7 @@ export default function AdminSellers() {
 
   return (
     <div className="text-slate-500 mb-28">
-      <h1 className="text-2xl">Manage <span className="text-slate-800 font-medium">Sellers</span></h1>
+      <h1 className="text-2xl">Quản lý <span className="text-slate-800 font-medium">Người Bán</span></h1>
 
       {stores.length ? (
         <div className="flex flex-col gap-4 mt-4">
@@ -48,10 +48,10 @@ export default function AdminSellers() {
               <StoreInfo store={store} />
 
               <div className="flex gap-3 pt-2 flex-wrap">
-                <button onClick={() => handleApprove(store.id, 'approved')} className="px-4 py-2 bg-green-600 text-white rounded">Approve</button>
-                <button onClick={() => handleApprove(store.id, 'rejected')} className="px-4 py-2 bg-slate-500 text-white rounded">Reject</button>
+                <button onClick={() => handleApprove(store.id, 'approved')} className="px-4 py-2 bg-green-600 text-white rounded">Duyệt</button>
+                <button onClick={() => handleApprove(store.id, 'rejected')} className="px-4 py-2 bg-slate-500 text-white rounded">Từ chối</button>
                 <label className="flex items-center gap-2">
-                  Active
+                  Kích hoạt
                   <input type="checkbox" checked={store.isActive} onChange={() => toggleActive(store)} />
                 </label>
               </div>
@@ -60,7 +60,7 @@ export default function AdminSellers() {
         </div>
       ) : (
         <div className="flex items-center justify-center h-80">
-          <h1 className="text-3xl text-slate-400 font-medium">No stores Available</h1>
+          <h1 className="text-3xl text-slate-400 font-medium">Không có cửa hàng nào</h1>
         </div>
       )}
     </div>

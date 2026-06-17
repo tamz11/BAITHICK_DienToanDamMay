@@ -1,6 +1,10 @@
 generator client {
+<<<<<<< HEAD
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
+=======
+    provider = "prisma-client-js"
+    output   = "../app/generated/prisma"
+>>>>>>> origin/main
 }
 
 datasource db {
@@ -31,6 +35,7 @@ model Category {
 }
 
 model Product {
+<<<<<<< HEAD
   id          String      @id @default(cuid())
   name        String
   description String      @db.Text
@@ -39,14 +44,29 @@ model Product {
   images      String
   category    String
   inStock     Boolean     @default(true)
-  stock       Int         @default(0)
-  isDeleted   Boolean     @default(false)
   storeId     String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
+  isDeleted   Boolean     @default(false)
+  stock       Int         @default(0)
   orderItems  OrderItem[]
   store       Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
   rating      Rating[]
+=======
+    id          String   @id @default(cuid())
+    name        String
+    description String   @db.Text
+    mrp         Float
+    price       Float
+    images      String
+    category    String
+    inStock     Boolean  @default(true)
+    stock       Int      @default(0)       // ➔ THÊM TRƯỜNG NÀY: Quản lý số lượng kho hàng
+    isDeleted   Boolean  @default(false)   // ➔ THÊM TRƯỜNG NÀY: Phục vụ chức năng Xóa mềm
+    storeId     String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+>>>>>>> origin/main
 
   @@index([storeId], map: "Product_storeId_fkey")
 }
@@ -149,6 +169,14 @@ model Store {
   Order       Order[]
   Product     Product[]
   user        User      @relation(fields: [userId], references: [id])
+=======
+enum OrderStatus {
+    ORDER_PLACED
+    PROCESSING
+    SHIPPED
+    DELIVERED
+    CANCELLED
+>>>>>>> origin/main
 }
 
 enum PaymentMethod {

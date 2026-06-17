@@ -3,11 +3,7 @@ import { getServerSession } from "next-auth/next";
 // ➔ CÁCH FIX DÒNG 3: Dùng đường dẫn tuyệt đối Alias @/ của dự án GoCart
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
 // ➔ CÁCH FIX DÒNG 4: Khởi tạo lớp kết nối tránh lỗi undefined hệ thống
-import { PrismaClient } from "@/app/generated/prisma"; 
-
-const globalForPrisma = globalThis;
-const prisma = globalForPrisma.prisma ?? new PrismaClient();
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+import prisma from '@/lib/prisma'
 
 // 1. LẤY TOÀN BỘ ĐƠN HÀNG THUỘC VỀ STORE CỦA SELLER ĐANG ĐĂNG NHẬP
 export async function GET() {
