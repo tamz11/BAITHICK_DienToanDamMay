@@ -34,7 +34,7 @@ export async function POST(req) {
         name, 
         email, 
         password: hashed,
-        role: 'CUSTOMER',
+        role: body.becomeSeller ? 'STORE_OWNER' : 'CUSTOMER',
         cart: {}
       } 
     })
