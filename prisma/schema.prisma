@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
 }
 
 datasource db {
@@ -38,11 +39,11 @@ model Product {
   images      String
   category    String
   inStock     Boolean     @default(true)
+  stock       Int         @default(0)
+  isDeleted   Boolean     @default(false)
   storeId     String
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  isDeleted   Boolean     @default(false)
-  stock       Int         @default(0)
   orderItems  OrderItem[]
   store       Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
   rating      Rating[]
@@ -50,6 +51,7 @@ model Product {
   @@index([storeId], map: "Product_storeId_fkey")
 }
 
+<<<<<<< HEAD
 model Order {
   id            String        @id @default(cuid())
   total         Float

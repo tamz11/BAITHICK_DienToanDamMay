@@ -53,7 +53,7 @@ const Navbar = () => {
                                 <Link href="/cart" className="relative flex items-center gap-2 text-slate-600">
                                     <ShoppingCart size={18} />
                                     Giỏ hàng
-                                    <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</button>
+                                    <span className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</span>
                                 </Link>
                                 <Link href="/profile" className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition">
                                     <User size={18} />
@@ -67,7 +67,7 @@ const Navbar = () => {
                                 <button type="button" onClick={() => router.push('/login?redirect=/cart')} className="relative flex items-center gap-2 text-slate-600">
                                     <ShoppingCart size={18} />
                                     Giỏ hàng
-                                    <button className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</button>
+                                    <span className="absolute -top-1 left-3 text-[8px] text-white bg-slate-600 size-3.5 rounded-full">{cartCount}</span>
                                 </button>
                                 <Link href="/login" className="px-8 py-2 bg-indigo-500 hover:bg-indigo-600 transition text-white rounded-full">
                                     Đăng nhập
