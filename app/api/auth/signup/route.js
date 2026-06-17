@@ -34,13 +34,13 @@ export async function POST(req) {
         name, 
         email, 
         password: hashed,
-        role: body.becomeSeller ? 'STORE_OWNER' : 'CUSTOMER',
+        role: (body.store && body.store.username) ? 'STORE_OWNER' : 'CUSTOMER',
         cart: {}
       } 
     })
 
     let storeCreated = null
-    if (body.becomeSeller && body.store) {
+    if (body.store && body.store.username) {
       const s = body.store
       // create store application
       try {

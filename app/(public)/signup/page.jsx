@@ -11,12 +11,13 @@ export default function SignupPage() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [becomeSeller, setBecomeSeller] = useState(false)
     const [storeName, setStoreName] = useState('')
     const [storeUsername, setStoreUsername] = useState('')
     const [storeDescription, setStoreDescription] = useState('')
     const [storeContact, setStoreContact] = useState('')
     const [storeEmail, setStoreEmail] = useState('')
+    const [storeAddress, setStoreAddress] = useState('')
+    const [storeLogo, setStoreLogo] = useState(null)
 
     const router = useRouter();
 
@@ -38,9 +39,9 @@ export default function SignupPage() {
         try {
             // Signup
             const payload = { name, email, password, confirmPassword }
-            if (becomeSeller) {
-                payload.becomeSeller = true
-                payload.store = { name: storeName, username: storeUsername, description: storeDescription, contact: storeContact, email: storeEmail }
+            // include store only when essential field (username) is provided
+            if (storeUsername) {
+                payload.store = { name: storeName, username: storeUsername, description: storeDescription, contact: storeContact, email: storeEmail, address: storeAddress }
             }
 
             const signupRes = await fetch('/api/auth/signup', {
@@ -100,35 +101,37 @@ export default function SignupPage() {
                         />
                     </label>
 
-                    <label className="flex items-center gap-2">
-                        <input type="checkbox" checked={becomeSeller} onChange={(e)=>setBecomeSeller(e.target.checked)} />
-                        <span className="text-sm text-slate-600">Tôi muốn trở thành cửa hàng</span>
-                    </label>
-
-                    {becomeSeller && (
-                        <div className="space-y-3">
-                            <label className="block text-sm font-medium text-slate-700">
-                                Tên cửa hàng
-                                <input value={storeName} onChange={(e)=>setStoreName(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="Tên cửa hàng" required={becomeSeller} />
-                            </label>
-                            <label className="block text-sm font-medium text-slate-700">
-                                Tên đăng nhập cửa hàng (username)
-                                <input value={storeUsername} onChange={(e)=>setStoreUsername(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="username-cua-hang" required={becomeSeller} />
-                            </label>
-                            <label className="block text-sm font-medium text-slate-700">
-                                Email cửa hàng
-                                <input value={storeEmail} onChange={(e)=>setStoreEmail(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="store@example.com" required={becomeSeller} />
-                            </label>
-                            <label className="block text-sm font-medium text-slate-700">
-                                Số điện thoại liên hệ
-                                <input value={storeContact} onChange={(e)=>setStoreContact(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="0123456789" required={becomeSeller} />
-                            </label>
-                            <label className="block text-sm font-medium text-slate-700">
-                                Mô tả cửa hàng
-                                <textarea value={storeDescription} onChange={(e)=>setStoreDescription(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="Mô tả ngắn về cửa hàng" required={becomeSeller} />
-                            </label>
-                        </div>
-                    )}
+                    <div className="space-y-3">
+                        <h2 className="text-lg font-medium text-slate-800">Thông tin cửa hàng (nếu bạn muốn bán hàng)</h2>
+                        <label className="block text-sm font-medium text-slate-700">
+                            Tên cửa hàng
+                            <input value={storeName} onChange={(e)=>setStoreName(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="Tên cửa hàng" />
+                        </label>
+                        <label className="block text-sm font-medium text-slate-700">
+                            Tên đăng nhập cửa hàng (username)
+                            <input value={storeUsername} onChange={(e)=>setStoreUsername(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="username-cua-hang" />
+                        </label>
+                        <label className="block text-sm font-medium text-slate-700">
+                            Email cửa hàng
+                            <input value={storeEmail} onChange={(e)=>setStoreEmail(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="store@example.com" />
+                        </label>
+                        <label className="block text-sm font-medium text-slate-700">
+                            Số điện thoại liên hệ
+                            <input value={storeContact} onChange={(e)=>setStoreContact(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="0123456789" />
+                        </label>
+                        <label className="block text-sm font-medium text-slate-700">
+                            Địa chỉ cửa hàng
+                            <input value={storeAddress} onChange={(e)=>setStoreAddress(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="Địa chỉ cửa hàng" />
+                        </label>
+                        <label className="block text-sm font-medium text-slate-700">
+                            Mô tả cửa hàng
+                            <textarea value={storeDescription} onChange={(e)=>setStoreDescription(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="Mô tả ngắn về cửa hàng" />
+                        </label>
+                        <label className="block text-sm font-medium text-slate-700">
+                            Logo cửa hàng
+                            <input type="file" accept="image/*" onChange={(e)=>setStoreLogo(e.target.files?.[0]||null)} className="mt-2 w-full" />
+                        </label>
+                    </div>
 
                     <label className="block text-sm font-medium text-slate-700">
                         Email
