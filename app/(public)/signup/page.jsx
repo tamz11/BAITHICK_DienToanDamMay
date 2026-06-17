@@ -11,6 +11,12 @@ export default function SignupPage() {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [becomeSeller, setBecomeSeller] = useState(false)
+    const [storeName, setStoreName] = useState('')
+    const [storeUsername, setStoreUsername] = useState('')
+    const [storeDescription, setStoreDescription] = useState('')
+    const [storeContact, setStoreContact] = useState('')
+    const [storeEmail, setStoreEmail] = useState('')
 
     const router = useRouter();
 
@@ -31,18 +37,28 @@ export default function SignupPage() {
 
         try {
             // Signup
+            const payload = { name, email, password, confirmPassword }
+            if (becomeSeller) {
+                payload.becomeSeller = true
+                payload.store = { name: storeName, username: storeUsername, description: storeDescription, contact: storeContact, email: storeEmail }
+            }
+
             const signupRes = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password, confirmPassword }),
+                body: JSON.stringify(payload),
             });
 
+            const resData = await signupRes.json()
             if (!signupRes.ok) {
-                const data = await signupRes.json();
-                throw new Error(data.error || 'Đăng ký thất bại');
+                throw new Error(resData.error || 'Đăng ký thất bại');
             }
 
-            toast.success('Đăng ký thành công! Đang đăng nhập...');
+            if (resData.store) {
+                toast.success('Đăng ký thành công! Hồ sơ cửa hàng đã được gửi, chờ admin duyệt.');
+            } else {
+                toast.success('Đăng ký thành công! Đang đăng nhập...');
+            }
 
             // Auto login after signup
             const loginResult = await signIn('credentials', {
@@ -52,7 +68,8 @@ export default function SignupPage() {
             });
 
             if (loginResult?.ok) {
-                router.push('/');
+                // if store application, redirect to profile where user can see status
+                router.push(resData.store ? '/profile' : '/')
             } else {
                 router.push('/login');
             }
@@ -82,6 +99,36 @@ export default function SignupPage() {
                             placeholder="Nguyễn Văn A"
                         />
                     </label>
+
+                    <label className="flex items-center gap-2">
+                        <input type="checkbox" checked={becomeSeller} onChange={(e)=>setBecomeSeller(e.target.checked)} />
+                        <span className="text-sm text-slate-600">Tôi muốn trở thành cửa hàng</span>
+                    </label>
+
+                    {becomeSeller && (
+                        <div className="space-y-3">
+                            <label className="block text-sm font-medium text-slate-700">
+                                Tên cửa hàng
+                                <input value={storeName} onChange={(e)=>setStoreName(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="Tên cửa hàng" required={becomeSeller} />
+                            </label>
+                            <label className="block text-sm font-medium text-slate-700">
+                                Tên đăng nhập cửa hàng (username)
+                                <input value={storeUsername} onChange={(e)=>setStoreUsername(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="username-cua-hang" required={becomeSeller} />
+                            </label>
+                            <label className="block text-sm font-medium text-slate-700">
+                                Email cửa hàng
+                                <input value={storeEmail} onChange={(e)=>setStoreEmail(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="store@example.com" required={becomeSeller} />
+                            </label>
+                            <label className="block text-sm font-medium text-slate-700">
+                                Số điện thoại liên hệ
+                                <input value={storeContact} onChange={(e)=>setStoreContact(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="0123456789" required={becomeSeller} />
+                            </label>
+                            <label className="block text-sm font-medium text-slate-700">
+                                Mô tả cửa hàng
+                                <textarea value={storeDescription} onChange={(e)=>setStoreDescription(e.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" placeholder="Mô tả ngắn về cửa hàng" required={becomeSeller} />
+                            </label>
+                        </div>
+                    )}
 
                     <label className="block text-sm font-medium text-slate-700">
                         Email
