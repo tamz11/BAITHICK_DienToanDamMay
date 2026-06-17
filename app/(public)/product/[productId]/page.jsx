@@ -10,17 +10,32 @@ export default function Product() {
     const { productId } = useParams();
     const [product, setProduct] = useState();
     const products = useSelector(state => state.product.list);
-
+useEffect(() => {
     const fetchProduct = async () => {
-        const product = products.find((product) => product.id === productId);
-        setProduct(product);
+        let matchedProduct = products.find((p) => p.id === productId);
+        
+        // 2. 🌟 NẾU KHÔNG CÓ TRONG REDUX: Gọi API bốc dữ liệu thật từ MySQL lên
+        if (!matchedProduct && productId) {
+            try {
+                const res = await fetch(`/api/products/${productId}`);
+                if (res.ok) {
+                    matchedProduct = await res.json();
+                } else {
+                    console.log("Không tìm thấy sản phẩm này ở cả Redux lẫn Database");
+                }
+            } catch (error) {
+                console.error("Lỗi lấy chi tiết sản phẩm thật:", error);
+            }
+        }
+
+        setProduct(matchedProduct);
     }
 
-    useEffect(() => {
-        if (products.length > 0) {
-            fetchProduct()
+    
+        if (productId) {
+            fetchProduct();
         }
-        scrollTo(0, 0)
+        window.scrollTo(0, 0);
     }, [productId,products]);
 
     return (
@@ -29,7 +44,7 @@ export default function Product() {
 
                 {/* Breadcrumbs */}
                 <div className="  text-gray-600 text-sm mt-8 mb-5">
-                    Trang chủ / Sản phẩm / {product?.category}
+                    Trang chủ / Sản phẩm / <span className="font-medium text-slate-800">{product?.category || "Chưa phân loại"}</span>
                 </div>
 
                 {/* Product Details */}
