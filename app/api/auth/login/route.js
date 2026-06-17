@@ -9,6 +9,8 @@ export async function POST(req) {
     const user = await prisma.user.findUnique({ where: { email } })
     if (!user) return new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 })
 
+    if (user.isActive === false) return new Response(JSON.stringify({ error: 'Tài khoản đã bị khóa' }), { status: 403 })
+
     const ok = await comparePassword(password, user.password)
     if (!ok) return new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 })
 

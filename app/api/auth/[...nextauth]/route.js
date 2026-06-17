@@ -27,6 +27,11 @@ export const authOptions = {
             throw new Error("Email không tồn tại");
           }
 
+          // Kiểm tra trạng thái isActive
+          if (user.isActive === false) {
+            throw new Error('Tài khoản của bạn đã bị khóa.');
+          }
+
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
             user.password

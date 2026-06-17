@@ -1,24 +1,24 @@
-'use client'
+"use client"
 import { useEffect, useState } from "react"
 import Loading from "../Loading"
 import Link from "next/link"
 import { ArrowRightIcon } from "lucide-react"
 import AdminNavbar from "./AdminNavbar"
 import AdminSidebar from "./AdminSidebar"
+import { useSession } from 'next-auth/react'
 
 const AdminLayout = ({ children }) => {
 
+    const { data: session, status } = useSession()
     const [isAdmin, setIsAdmin] = useState(false)
     const [loading, setLoading] = useState(true)
 
-    const fetchIsAdmin = async () => {
-        setIsAdmin(true)
-        setLoading(false)
-    }
-
     useEffect(() => {
-        fetchIsAdmin()
-    }, [])
+        if (status === 'loading') return
+        const isAdminRole = session?.user?.role === 'ADMIN'
+        setIsAdmin(!!isAdminRole)
+        setLoading(false)
+    }, [session, status])
 
     return loading ? (
         <Loading />

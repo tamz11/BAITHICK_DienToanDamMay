@@ -3,11 +3,14 @@ import { useEffect, useState } from "react"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
 import { DeleteIcon } from "lucide-react"
-import { couponDummyData } from "@/assets/assets"
+import Loading from '@/components/Loading'
+import { useSession } from 'next-auth/react'
 
 export default function AdminCoupons() {
 
     const [coupons, setCoupons] = useState([])
+    const [loading, setLoading] = useState(true)
+    const { data: session } = useSession()
 
     const [newCoupon, setNewCoupon] = useState({
         code: '',
@@ -20,14 +23,32 @@ export default function AdminCoupons() {
     })
 
     const fetchCoupons = async () => {
-        setCoupons(couponDummyData)
+        setLoading(true)
+        const res = await fetch('/api/admin/coupons')
+        const data = await res.json()
+        setCoupons(data.coupons || [])
+        setLoading(false)
     }
 
     const handleAddCoupon = async (e) => {
         e.preventDefault()
-        // Logic to add a coupon
-
-
+        const body = {
+            code: newCoupon.code,
+            description: newCoupon.description,
+            discount: parseFloat(newCoupon.discount),
+            forNewUser: newCoupon.forNewUser,
+            forMember: newCoupon.forMember,
+            isPublic: newCoupon.isPublic,
+            expiresAt: format(newCoupon.expiresAt, 'yyyy-MM-dd')
+        }
+        const res = await fetch('/api/admin/coupons', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        const data = await res.json()
+        if (res.ok) {
+            setNewCoupon({ code: '', description: '', discount: '', forNewUser: false, forMember: false, isPublic: false, expiresAt: new Date() })
+            await fetchCoupons()
+        } else {
+            throw new Error(data.error || 'Failed')
+        }
     }
 
     const handleChange = (e) => {
@@ -35,14 +56,17 @@ export default function AdminCoupons() {
     }
 
     const deleteCoupon = async (code) => {
-        // Logic to delete a coupon
-
-
+        const res = await fetch('/api/admin/coupons', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) })
+        const data = await res.json()
+        if (res.ok) await fetchCoupons()
+        else throw new Error(data.error || 'Failed')
     }
 
     useEffect(() => {
         fetchCoupons();
-    }, [])
+    }, [session])
+
+    if (loading) return <Loading />
 
     return (
         <div className="text-slate-500 mb-40">

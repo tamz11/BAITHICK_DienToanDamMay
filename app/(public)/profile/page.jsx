@@ -27,6 +27,29 @@ export default function ProfilePage() {
         }
     }, [status, session, router]);
 
+        useEffect(() => {
+            const fetchStore = async () => {
+                try {
+                    const res = await fetch('/api/store/me')
+                    if (!res.ok) return
+                    const data = await res.json()
+                    if (data.store) {
+                        // show small banner if application pending
+                        // no need to set state beyond showing message
+                        if (data.store.status === 'pending') {
+                            toast('Bạn đã đăng ký làm cửa hàng. Đang chờ admin xét duyệt.', { icon: 'ℹ️' })
+                        } else if (!data.store.isActive) {
+                            toast('Hồ sơ cửa hàng chưa hoạt động.', { icon: 'ℹ️' })
+                        }
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            }
+
+            if (status === 'authenticated') fetchStore()
+        }, [status])
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
