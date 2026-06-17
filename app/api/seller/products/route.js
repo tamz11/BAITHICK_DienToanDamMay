@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
 // ➔ KHỞI TẠO PRISMACLIENT CHUẨN ĐỂ BIẾN PRISMA KHÔNG BỊ UNDEFINED
 import prisma from '@/lib/prisma'
-
+export const dynamic = 'force-dynamic';
 export async function GET() {
     try {
         const session = await getServerSession(authOptions);
@@ -21,6 +21,7 @@ export async function GET() {
         // Lấy danh sách sản phẩm chưa bị xóa mềm của riêng cửa hàng này
         const products = await prisma.product.findMany({
             where: { storeId: store.id, isDeleted: false },
+            include: { rating: true },
             orderBy: { createdAt: "desc" }
         });
 
@@ -47,7 +48,7 @@ export async function POST(req) {
         }
 
         const body = await req.json();
-        const { name, description, mrp, price, category, stock } = body;
+        const { name, description, mrp, price, category, stock, images } = body;
 
         // 2. Chốt chặn kiểm tra dữ liệu đầu vào không được bỏ trống
         if (!name || !price || !stock) {
@@ -61,7 +62,7 @@ export async function POST(req) {
                 description: description || "",
                 mrp: parseFloat(mrp) || parseFloat(price),
                 price: parseFloat(price),
-                images: "", // Tạm thời để rỗng vì form của bạn chưa có nút upload ảnh
+                images: images || "", // Sử dụng ảnh từ form nếu có, ngược lại để rỗng
                 category: category || "Chưa phân loại",
                 stock: parseInt(stock) || 0,
                 inStock: parseInt(stock) > 0,
