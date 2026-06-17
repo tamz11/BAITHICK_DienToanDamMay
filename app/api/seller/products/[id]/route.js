@@ -3,11 +3,7 @@ import { getServerSession } from "next-auth/next";
 // ➔ CÁCH FIX 1: Thay thế bằng đường dẫn tuyệt đối Alias @/
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
 // ➔ CÁCH FIX 2: Khởi tạo PrismaClient tránh lỗi undefined hệ thống
-import { PrismaClient } from "@/app/generated/prisma"; 
-
-const globalForPrisma = globalThis;
-const prisma = globalForPrisma.prisma ?? new PrismaClient();
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+import prisma from '@/lib/prisma'
 
 // 1. API SỬA SẢN PHẨM & CẬP NHẬT KHO HÀNG
 export async function PUT(req, { params }) {

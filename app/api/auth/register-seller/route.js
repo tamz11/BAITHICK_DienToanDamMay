@@ -1,24 +1,24 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@/app/generated/prisma"; // Thư mục sinh Client của bạn
+import prisma from '@/lib/prisma'
 import { nanoid } from "nanoid";
-
-const globalForPrisma = globalThis;
-const prisma = globalForPrisma.prisma ?? new PrismaClient();
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 export async function POST(req) {
     try {
-        const { name, email, password, storeName } = await req.json();
+        const { name, email, password, storeName, storeUsername, storeEmail, storeContact, storeAddress, storeDescription, storeLogoUrl } = await req.json();
 
         // Kiểm tra dữ liệu đầu vào
-        if (!name || !email || !password || !storeName) {
-            return NextResponse.json({ error: "Vui lòng nhập đầy đủ thông tin bắt buộc" }, { status: 400 });
+        if (!name || !email || !password || !storeName || !storeUsername) {
+            return NextResponse.json({ error: "Vui lòng nhập đầy đủ thông tin bắt buộc (bao gồm username cửa hàng)" }, { status: 400 });
         }
 
-        // 1. Kiểm tra email đã tồn tại chưa
+        // 1. Kiểm tra email hoặc username đã tồn tại chưa
         const existingUser = await prisma.user.findUnique({ where: { email } });
         if (existingUser) {
             return NextResponse.json({ error: "Email này đã được sử dụng" }, { status: 400 });
+        }
+        const existingStore = await prisma.store.findUnique({ where: { username: storeUsername } });
+        if (existingStore) {
+            return NextResponse.json({ error: "Username cửa hàng đã được sử dụng, vui lòng chọn tên khác" }, { status: 400 });
         }
 
         // 2. Mã hóa mật khẩu
@@ -34,7 +34,8 @@ export async function POST(req) {
                     email,
                     password: hashedPassword,
                     role: "STORE_OWNER", // Gán quyền chủ cửa hàng
-                    image: ""
+                    image: "",
+                    cart: {} // ensure required Json field is present
                 }
             });
 
@@ -42,12 +43,14 @@ export async function POST(req) {
                 data: {
                     userId: newUser.id,
                     name: storeName,
-                    username: `store_${nanoid(6)}`, // Tạo username độc nhất cho store
-                    description: "Chưa có mô tả cửa hàng",
-                    address: "Chưa cập nhật địa chỉ kho",
-                    logo: "",
-                    email: newUser.email,
-                    contact: "Chưa cập nhật SĐT"
+                    username: storeUsername,
+                    description: storeDescription || "",
+                    address: storeAddress || "",
+                    status: 'pending',
+                    isActive: false,
+                    logo: storeLogoUrl || "",
+                    email: storeEmail || newUser.email,
+                    contact: storeContact || ""
                 }
             });
         });
