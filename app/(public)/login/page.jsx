@@ -35,7 +35,13 @@ export default function LoginPage() {
             } else if (result?.ok) {
                 toast.success('Đăng nhập thành công!');
                 const session = await getSession();
-                const destination = session?.user?.role === 'ADMIN' ? '/admin' : redirect;
+                let destination = redirect;
+                if (session?.user?.role === 'ADMIN') {
+                    destination = '/admin';
+                } else if (session?.user?.role === 'STORE_OWNER') {
+                    destination = '/seller'; // Đẩy người bán vào thư mục /seller dùng chung
+                }
+              //  const destination = session?.user?.role === 'ADMIN' ? '/admin' : redirect;
                 router.push(destination);
             }
         } catch (error) {
@@ -91,10 +97,17 @@ export default function LoginPage() {
                     <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-700">
                         Chưa có tài khoản? Đăng ký
                     </Link>
+                   
                     <button type="button" className="font-medium text-slate-600 hover:text-slate-900">
                         Quên mật khẩu?
                     </button>
                 </div>
+                    <div className="bg-slate-50 p-3 rounded-xl flex items-center justify-between">
+                        <span className="text-xs text-slate-500">Bạn muốn kinh doanh?</span>
+                        <Link href="/register/seller" className="font-semibold text-xs text-indigo-600 hover:underline">
+                            Đăng ký Kênh Người Bán ➔
+                        </Link>
+                    </div>
             </div>
         </main>
     );
