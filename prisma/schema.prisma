@@ -1,10 +1,5 @@
 generator client {
-<<<<<<< HEAD
   provider = "prisma-client-js"
-=======
-    provider = "prisma-client-js"
-    output   = "../app/generated/prisma"
->>>>>>> origin/main
 }
 
 datasource db {
@@ -35,43 +30,27 @@ model Category {
 }
 
 model Product {
-<<<<<<< HEAD
-  id          String      @id @default(cuid())
+  id          String        @id @default(cuid())
   name        String
-  description String      @db.Text
+  description String        @db.Text
   mrp         Float
   price       Float
-  images      String
+  images      String        @db.LongText
   category    String
-  inStock     Boolean     @default(true)
+  inStock     Boolean       @default(true)
+  stock       Int           @default(0)
+  isDeleted   Boolean       @default(false)
+  status      ProductStatus @default(PENDING)
   storeId     String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  isDeleted   Boolean     @default(false)
-  stock       Int         @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   orderItems  OrderItem[]
-  store       Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  store       Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
   rating      Rating[]
-=======
-    id          String   @id @default(cuid())
-    name        String
-    description String   @db.Text
-    mrp         Float
-    price       Float
-    images      String
-    category    String
-    inStock     Boolean  @default(true)
-    stock       Int      @default(0)       // ➔ THÊM TRƯỜNG NÀY: Quản lý số lượng kho hàng
-    isDeleted   Boolean  @default(false)   // ➔ THÊM TRƯỜNG NÀY: Phục vụ chức năng Xóa mềm
-    storeId     String
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
->>>>>>> origin/main
 
   @@index([storeId], map: "Product_storeId_fkey")
 }
 
-<<<<<<< HEAD
 model Order {
   id            String        @id @default(cuid())
   total         Float
@@ -169,14 +148,6 @@ model Store {
   Order       Order[]
   Product     Product[]
   user        User      @relation(fields: [userId], references: [id])
-=======
-enum OrderStatus {
-    ORDER_PLACED
-    PROCESSING
-    SHIPPED
-    DELIVERED
-    CANCELLED
->>>>>>> origin/main
 }
 
 enum PaymentMethod {
@@ -197,4 +168,10 @@ enum Order_status {
   SHIPPED
   DELIVERED
   CANCELLED
+}
+
+enum ProductStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
