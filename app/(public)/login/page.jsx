@@ -36,12 +36,15 @@ export default function LoginPage() {
                 toast.success('Đăng nhập thành công!');
                 const session = await getSession();
                 let destination = redirect;
+
                 if (session?.user?.role === 'ADMIN') {
                     destination = '/admin';
                 } else if (session?.user?.role === 'STORE_OWNER') {
-                    destination = '/seller'; // Đẩy người bán vào thư mục /seller dùng chung
+                    destination = '/seller';
+                } else if (session?.user?.role === 'STAFF') {
+                    destination = '/staff';
                 }
-              //  const destination = session?.user?.role === 'ADMIN' ? '/admin' : redirect;
+
                 router.push(destination);
             }
         } catch (error) {
@@ -102,12 +105,20 @@ export default function LoginPage() {
                         Quên mật khẩu?
                     </button>
                 </div>
+                <div className="mt-4 space-y-2">
                     <div className="bg-slate-50 p-3 rounded-xl flex items-center justify-between">
                         <span className="text-xs text-slate-500">Bạn muốn kinh doanh?</span>
                         <Link href="/register/seller" className="font-semibold text-xs text-indigo-600 hover:underline">
-                            Đăng ký Kênh Người Bán ➔
+                            Đăng ký Người Bán ➔
                         </Link>
                     </div>
+                    <div className="bg-slate-50 p-3 rounded-xl flex items-center justify-between">
+                        <span className="text-xs text-slate-500">Gia nhập đội ngũ?</span>
+                        <Link href="/register/staff" className="font-semibold text-xs text-blue-600 hover:underline">
+                            Đăng ký Nhân viên ➔
+                        </Link>
+                    </div>
+                </div>
             </div>
         </main>
     );
