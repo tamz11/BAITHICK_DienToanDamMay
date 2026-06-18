@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import PageTitle from "@/components/PageTitle";
 import OrderItem from "@/components/OrderItem";
-import { couponDummyData, orderDummyData } from "@/assets/assets";
+import { couponDummyData } from "@/assets/assets";
 
 export default function ProfilePage() {
     const { data: session, status } = useSession();
@@ -58,9 +58,26 @@ export default function ProfilePage() {
         }, [status])
 
     useEffect(() => {
-        setOrders(orderDummyData);
-        setCoupons(couponDummyData.filter((coupon) => new Date(coupon.expiresAt) > new Date()));
-    }, []);
+        const fetchOrdersAndCoupons = async () => {
+            try {
+                // Fetch orders from API
+                const ordersRes = await fetch('/api/orders');
+                if (ordersRes.ok) {
+                    const ordersData = await ordersRes.json();
+                    setOrders(ordersData.data || []);
+                }
+            } catch (err) {
+                console.error('Fetch orders error:', err);
+            }
+
+            // Fetch coupons (still using dummy data for now)
+            setCoupons(couponDummyData.filter((coupon) => new Date(coupon.expiresAt) > new Date()));
+        };
+
+        if (status === 'authenticated') {
+            fetchOrdersAndCoupons();
+        }
+    }, [status]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

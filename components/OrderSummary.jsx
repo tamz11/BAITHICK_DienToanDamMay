@@ -1,16 +1,18 @@
 import { PlusIcon, SquarePenIcon, XIcon } from 'lucide-react';
 import React, { useState } from 'react'
 import AddressModal from './AddressModal';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { clearCart } from '@/lib/features/cart/cartSlice';
 
 const OrderSummary = ({ totalPrice, items }) => {
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$';
 
     const router = useRouter();
+    const dispatch = useDispatch();
     const { data: session } = useSession();
 
     const addressList = useSelector(state => state.address.list);
@@ -19,11 +21,45 @@ const OrderSummary = ({ totalPrice, items }) => {
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [couponCodeInput, setCouponCodeInput] = useState('');
-    const [coupon, setCoupon] = useState('');
+    const [coupon, setCoupon] = useState(null);
+    const [loadingCoupon, setLoadingCoupon] = useState(false);
+    const [loadingOrder, setLoadingOrder] = useState(false);
 
     const handleCouponCode = async (event) => {
         event.preventDefault();
         
+        if (!couponCodeInput.trim()) {
+            toast.error('Vui lòng nhập mã giảm giá');
+            return;
+        }
+
+        setLoadingCoupon(true);
+        try {
+            const response = await fetch('/api/coupons/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    code: couponCodeInput.trim(),
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Lỗi kiểm tra mã giảm giá');
+            }
+
+            setCoupon(data.data);
+            setCouponCodeInput('');
+            toast.success(`Áp dụng mã "${data.data.code}" thành công!`);
+        } catch (err) {
+            console.error('Coupon validation error:', err);
+            toast.error(err.message || 'Lỗi kiểm tra mã giảm giá');
+        } finally {
+            setLoadingCoupon(false);
+        }
     }
 
     const handlePlaceOrder = async (e) => {
@@ -34,7 +70,75 @@ const OrderSummary = ({ totalPrice, items }) => {
             return;
         }
 
-        router.push('/orders')
+        if (!selectedAddress) {
+            toast.error('Vui lòng chọn địa chỉ giao hàng');
+            return;
+        }
+
+        if (!items || items.length === 0) {
+            toast.error('Giỏ hàng trống');
+            return;
+        }
+
+        // Get storeId from first item
+        const storeId = items[0]?.storeId;
+        if (!storeId) {
+            toast.error('Không tìm thấy cửa hàng');
+            return;
+        }
+
+        // Prepare order items
+        const orderItems = items.map(item => ({
+            productId: item.id,
+            quantity: item.quantity,
+            price: item.price,
+        }));
+
+        // Calculate final price
+        let finalPrice = totalPrice;
+        if (coupon) {
+            finalPrice = totalPrice - (coupon.discount / 100 * totalPrice);
+        }
+
+        setLoadingOrder(true);
+        try {
+            const response = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    addressId: selectedAddress.id,
+                    paymentMethod,
+                    items: orderItems,
+                    coupon: coupon || null,
+                    totalPrice: finalPrice,
+                    storeId,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Lỗi đặt hàng');
+            }
+
+            // Clear cart
+            dispatch(clearCart());
+
+            // Show success message
+            toast.success('Đặt hàng thành công!');
+
+            // Redirect to orders page
+            setTimeout(() => {
+                router.push('/orders');
+            }, 1500);
+        } catch (err) {
+            console.error('Checkout error:', err);
+            toast.error(err.message || 'Lỗi đặt hàng');
+        } finally {
+            setLoadingOrder(false);
+        }
     }
 
     return (
@@ -91,15 +195,27 @@ const OrderSummary = ({ totalPrice, items }) => {
                 </div>
                 {
                     !coupon ? (
-                        <form onSubmit={e => toast.promise(handleCouponCode(e), { loading: 'Đang kiểm tra mã...' })} className='flex justify-center gap-3 mt-3'>
-                            <input onChange={(e) => setCouponCodeInput(e.target.value)} value={couponCodeInput} type="text" placeholder='Mã giảm giá' className='border border-slate-400 p-1.5 rounded w-full outline-none' />
-                            <button className='bg-slate-600 text-white px-3 rounded hover:bg-slate-800 active:scale-95 transition-all'>Áp dụng</button>
+                        <form onSubmit={handleCouponCode} className='flex justify-center gap-3 mt-3'>
+                            <input 
+                                onChange={(e) => setCouponCodeInput(e.target.value)} 
+                                value={couponCodeInput} 
+                                type="text" 
+                                placeholder='Mã giảm giá' 
+                                className='border border-slate-400 p-1.5 rounded w-full outline-none' 
+                                disabled={loadingCoupon}
+                            />
+                            <button 
+                                type='submit'
+                                disabled={loadingCoupon}
+                                className='bg-slate-600 text-white px-3 rounded hover:bg-slate-800 active:scale-95 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed'>
+                                {loadingCoupon ? 'Đang...' : 'Áp dụng'}
+                            </button>
                         </form>
                     ) : (
                         <div className='w-full flex items-center justify-center gap-2 text-xs mt-2'>
                             <p>Mã: <span className='font-semibold ml-1'>{coupon.code.toUpperCase()}</span></p>
                             <p>{coupon.description}</p>
-                            <XIcon size={18} onClick={() => setCoupon('')} className='hover:text-red-700 transition cursor-pointer' />
+                            <XIcon size={18} onClick={() => setCoupon(null)} className='hover:text-red-700 transition cursor-pointer' />
                         </div>
                     )
                 }
@@ -108,7 +224,12 @@ const OrderSummary = ({ totalPrice, items }) => {
                 <p>Tổng cộng:</p>
                 <p className='font-medium text-right'>{currency}{coupon ? (totalPrice - (coupon.discount / 100 * totalPrice)).toFixed(2) : totalPrice.toLocaleString()}</p>
             </div>
-            <button onClick={e => toast.promise(handlePlaceOrder(e), { loading: 'Đang đặt hàng...' })} className='w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all'>Đặt hàng</button>
+            <button 
+                onClick={handlePlaceOrder} 
+                disabled={loadingOrder}
+                className='w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed'>
+                {loadingOrder ? 'Đang đặt hàng...' : 'Đặt hàng'}
+            </button>
 
             {showAddressModal && <AddressModal setShowAddressModal={setShowAddressModal} />}
 
