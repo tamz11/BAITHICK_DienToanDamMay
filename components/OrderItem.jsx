@@ -55,29 +55,36 @@ const OrderItem = ({ order }) => {
 
                 <td className="text-left space-y-2 text-sm max-md:hidden">
                     <div
-                        className={`flex items-center justify-center gap-1 rounded-full p-1 ${order.status === 'confirmed'
-                            ? 'text-yellow-500 bg-yellow-100'
+                        className={`flex items-center justify-between gap-2 rounded-3xl border px-3 py-2 ${order.status === 'confirmed'
+                            ? 'border-yellow-200 bg-yellow-50 text-yellow-700'
                             : order.status === 'delivered'
-                                ? 'text-green-500 bg-green-100'
-                                : 'text-slate-500 bg-slate-100'
+                                ? 'border-green-200 bg-green-50 text-green-700'
+                                : 'border-slate-200 bg-slate-50 text-slate-700'
                             }`}
                     >
-                        <DotIcon size={10} className="scale-250" />
-                        {order.status.split('_').join(' ').toLowerCase()}
+                        <span className="flex items-center gap-2">
+                            <DotIcon size={10} className="scale-250" />
+                            {order.status.split('_').join(' ').toLowerCase()}
+                        </span>
+                        {order.isCouponUsed && order.coupon?.code ? (
+                            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">{order.coupon.code}</span>
+                        ) : null}
                     </div>
                 </td>
             </tr>
             {/* Mobile */}
             <tr className="md:hidden">
                 <td colSpan={5}>
-                    <p>{order.address.name}, {order.address.street}</p>
-                    <p>{order.address.city}, {order.address.state}, {order.address.zip}, {order.address.country}</p>
-                    <p>{order.address.phone}</p>
-                    <br />
-                    <div className="flex items-center">
-                        <span className='text-center mx-auto px-6 py-1.5 rounded bg-green-100 text-green-700' >
+                    <p className="font-medium text-slate-700">{order.address.name}, {order.address.street}</p>
+                    <p className="text-sm text-slate-500">{order.address.city}, {order.address.state}, {order.address.zip}, {order.address.country}</p>
+                    <p className="text-sm text-slate-500">{order.address.phone}</p>
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                        <span className='px-4 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold'>
                             {order.status.replace(/_/g, ' ').toLowerCase()}
                         </span>
+                        {order.isCouponUsed && order.coupon?.code ? (
+                            <span className='px-4 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold'>Coupon: {order.coupon.code}</span>
+                        ) : null}
                     </div>
                 </td>
             </tr>
