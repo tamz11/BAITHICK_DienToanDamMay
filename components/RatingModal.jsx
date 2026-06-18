@@ -4,22 +4,59 @@ import { Star } from 'lucide-react';
 import React, { useState } from 'react'
 import { XIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { addRating } from '@/lib/features/rating/ratingSlice';
 
 const RatingModal = ({ ratingModal, setRatingModal }) => {
 
     const [rating, setRating] = useState(0);
     const [review, setReview] = useState('');
+    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
 
     const handleSubmit = async () => {
-        if (rating < 0 || rating > 5) {
-            return toast('Vui lòng chọn đánh giá');
+        if (rating < 1 || rating > 5) {
+            toast.error('Vui lòng chọn đánh giá từ 1 đến 5 sao');
+            return;
         }
         if (review.length < 5) {
-            return toast('Viếp nhận xét ngắn');
+            toast.error('Nhận xét phải có ít nhất 5 ký tự');
+            return;
         }
 
-        setRatingModal(null);
-    }
+        setLoading(true);
+        try {
+            const response = await fetch('/api/ratings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productId: ratingModal?.productId,
+                    orderId: ratingModal?.orderId,
+                    rating,
+                    review,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Lỗi gửi đánh giá');
+            }
+
+            const data = await response.json();
+            dispatch(addRating(data.data));
+            toast.success('Đánh giá thành công!');
+            setRatingModal(null);
+            setRating(0);
+            setReview('');
+        } catch (err) {
+            console.error('Rating submission error:', err);
+            toast.error(err.message || 'Lỗi gửi đánh giá');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className='fixed inset-0 z-120 flex items-center justify-center bg-black/10'>
@@ -43,9 +80,13 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
                     rows='4'
                     value={review}
                     onChange={(e) => setReview(e.target.value)}
+                    disabled={loading}
                 ></textarea>
-                <button onClick={e => toast.promise(handleSubmit(), { loading: 'Đang gửi...' })} className='w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition'>
-                    Gửi Đánh giá
+                <button 
+                    onClick={handleSubmit} 
+                    disabled={loading}
+                    className='w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition disabled:bg-gray-400 disabled:cursor-not-allowed'>
+                    {loading ? 'Đang gửi...' : 'Gửi Đánh giá'}
                 </button>
             </div>
         </div>
