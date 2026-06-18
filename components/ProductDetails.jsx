@@ -4,7 +4,6 @@ import { addToCart } from "@/lib/features/cart/cartSlice";
 import { StarIcon, TagIcon, EarthIcon, CreditCardIcon, UserIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Counter from "./Counter";
 import { useDispatch, useSelector } from "react-redux";
 import { useSession } from "next-auth/react";
@@ -18,33 +17,38 @@ const ProductDetails = ({ product }) => {
     const dispatch = useDispatch();
     const router = useRouter()
 
+    // Hàm lấy link ảnh an toàn hỗ trợ cả Static Import (đối tượng) và URL String
+    const getImageUrl = (img) => {
+        if (!img) return "https://via.placeholder.com/500"
+        if (typeof img === 'string') {
+            try {
+                if (img.startsWith('[') && img.endsWith(']')) {
+                    const parsed = JSON.parse(img)
+                    return parsed[0] || "https://via.placeholder.com/500"
+                }
+            } catch (e) {}
+            return img
+        }
+        // Nếu là Static Import của Next.js, lấy thuộc tính .src
+        return img.src || img
+    }
+
     // Xử lý an toàn cho mảng ảnh
     let productImages = []
     if (product.images) {
         if (Array.isArray(product.images)) {
-            productImages = product.images
-        } else if (typeof product.images === 'string') {
-            try {
-                // Kiểm tra xem chuỗi có phải định dạng JSON array không
-                if (product.images.startsWith('[') && product.images.endsWith(']')) {
-                    productImages = JSON.parse(product.images)
-                } else {
-                    productImages = [product.images]
-                }
-            } catch (e) {
-                productImages = [product.images]
-            }
+            productImages = product.images.map(img => getImageUrl(img))
+        } else {
+            productImages = [getImageUrl(product.images)]
         }
     }
 
-    // Nếu vẫn trống thì dùng ảnh mặc định
     if (productImages.length === 0) {
         productImages = ["https://via.placeholder.com/500"]
     }
 
     const [mainImage, setMainImage] = useState(productImages[0]);
 
-    // Đồng bộ mainImage khi product thay đổi
     useEffect(() => {
         setMainImage(productImages[0])
     }, [product.id])
@@ -65,7 +69,6 @@ const ProductDetails = ({ product }) => {
         }
     }
 
-    // Xử lý an toàn cho Rating
     const ratingList = product.rating || []
     const averageRating = ratingList.length > 0
         ? ratingList.reduce((acc, item) => acc + item.rating, 0) / ratingList.length
