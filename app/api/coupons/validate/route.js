@@ -21,6 +21,7 @@ export async function POST(req) {
       )
     }
 
+<<<<<<< HEAD
     // Normalize coupon code: remove spaces and uppercase
     const couponCode = code.replace(/\s+/g, '').toUpperCase()
 
@@ -38,6 +39,14 @@ export async function POST(req) {
     }
 
     if (!coupon) {
+=======
+    // Find coupon by code
+    const coupon = await prisma.coupon.findUnique({
+      where: { code: code.toUpperCase() },
+    })
+
+    if (!coupon) {
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
       return new Response(
         JSON.stringify({ error: 'Mã giảm giá không tồn tại' }),
         { status: 404 }
@@ -52,6 +61,7 @@ export async function POST(req) {
       )
     }
 
+<<<<<<< HEAD
     // Check if coupon is public or private but available for this user
     if (!coupon.isPublic) {
       if (coupon.forNewUser) {
@@ -71,6 +81,26 @@ export async function POST(req) {
       } else {
         return new Response(
           JSON.stringify({ error: 'Mã giảm giá không khả dụng' }),
+=======
+    // Check if coupon is public
+    if (!coupon.isPublic) {
+      return new Response(
+        JSON.stringify({ error: 'Mã giảm giá không khả dụng' }),
+        { status: 400 }
+      )
+    }
+
+    // Check if coupon is for new users
+    if (coupon.forNewUser) {
+      const userOrders = await prisma.order.findFirst({
+        where: {
+          user: { email: session.user.email },
+        },
+      })
+      if (userOrders) {
+        return new Response(
+          JSON.stringify({ error: 'Mã này chỉ dành cho khách hàng mới' }),
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
           { status: 400 }
         )
       }

@@ -25,11 +25,14 @@ const OrderSummary = ({ totalPrice, items }) => {
     const [loadingCoupon, setLoadingCoupon] = useState(false);
     const [loadingOrder, setLoadingOrder] = useState(false);
 
+<<<<<<< HEAD
     const handleSelectAddress = (event) => {
         const address = addressList.find((item) => item.id === event.target.value);
         setSelectedAddress(address || null);
     };
 
+=======
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
     const handleCouponCode = async (event) => {
         event.preventDefault();
         
@@ -42,12 +45,19 @@ const OrderSummary = ({ totalPrice, items }) => {
         try {
             const response = await fetch('/api/coupons/validate', {
                 method: 'POST',
+<<<<<<< HEAD
                 credentials: 'include',
+=======
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+<<<<<<< HEAD
                     code: couponCodeInput.replace(/\s+/g, '').toUpperCase(),
+=======
+                    code: couponCodeInput.trim(),
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
                 }),
             });
 
@@ -110,13 +120,19 @@ const OrderSummary = ({ totalPrice, items }) => {
         try {
             const response = await fetch('/api/checkout', {
                 method: 'POST',
+<<<<<<< HEAD
                 credentials: 'include',
+=======
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     addressId: selectedAddress.id,
+<<<<<<< HEAD
                     address: selectedAddress,
+=======
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
                     paymentMethod,
                     items: orderItems,
                     coupon: coupon || null,
@@ -173,11 +189,19 @@ const OrderSummary = ({ totalPrice, items }) => {
                         <div>
                             {
                                 addressList.length > 0 && (
+<<<<<<< HEAD
                                     <select className='border border-slate-400 p-2 w-full my-3 outline-none rounded' value={selectedAddress?.id || ''} onChange={handleSelectAddress} >
                                         <option value="">Chọn địa chỉ</option>
                                         {
                                             addressList.map((address) => (
                                                 <option key={address.id} value={address.id}>{address.name}, {address.city}, {address.state}, {address.zip}</option>
+=======
+                                    <select className='border border-slate-400 p-2 w-full my-3 outline-none rounded' onChange={(e) => setSelectedAddress(addressList[e.target.value])} >
+                                        <option value="">Chọn địa chỉ</option>
+                                        {
+                                            addressList.map((address, index) => (
+                                                <option key={index} value={index}>{address.name}, {address.city}, {address.state}, {address.zip}</option>
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
                                             ))
                                         }
                                     </select>

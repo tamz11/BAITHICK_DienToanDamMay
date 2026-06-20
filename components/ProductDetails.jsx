@@ -17,6 +17,7 @@ const ProductDetails = ({ product }) => {
     const dispatch = useDispatch();
     const router = useRouter()
 
+<<<<<<< HEAD
     const getSafeImageUrl = (img) => {
         if (!img) return "https://via.placeholder.com/500"
         if (typeof img !== 'string') {
@@ -54,6 +55,42 @@ const ProductDetails = ({ product }) => {
 
     useEffect(() => {
         setMainImage(productImages[0] || "https://via.placeholder.com/500")
+=======
+    // Hàm lấy link ảnh an toàn hỗ trợ cả Static Import (đối tượng) và URL String
+    const getImageUrl = (img) => {
+        if (!img) return "https://via.placeholder.com/500"
+        if (typeof img === 'string') {
+            try {
+                if (img.startsWith('[') && img.endsWith(']')) {
+                    const parsed = JSON.parse(img)
+                    return parsed[0] || "https://via.placeholder.com/500"
+                }
+            } catch (e) {}
+            return img
+        }
+        // Nếu là Static Import của Next.js, lấy thuộc tính .src
+        return img.src || img
+    }
+
+    // Xử lý an toàn cho mảng ảnh
+    let productImages = []
+    if (product.images) {
+        if (Array.isArray(product.images)) {
+            productImages = product.images.map(img => getImageUrl(img))
+        } else {
+            productImages = [getImageUrl(product.images)]
+        }
+    }
+
+    if (productImages.length === 0) {
+        productImages = ["https://via.placeholder.com/500"]
+    }
+
+    const [mainImage, setMainImage] = useState(productImages[0]);
+
+    useEffect(() => {
+        setMainImage(productImages[0])
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
     }, [product.id])
 
     const addToCartHandler = () => {

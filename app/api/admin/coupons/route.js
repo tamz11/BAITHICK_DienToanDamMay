@@ -18,6 +18,7 @@ export async function POST(req) {
     const { code, description, discount, forNewUser = false, forMember = false, isPublic = false, expiresAt } = body
     if (!code || !description || !discount || !expiresAt) return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400 })
 
+<<<<<<< HEAD
     const normalizedCode = String(code).replace(/\s+/g, '').toUpperCase()
 
     const exists = await prisma.coupon.findUnique({ where: { code: normalizedCode } })
@@ -25,6 +26,13 @@ export async function POST(req) {
 
     const created = await prisma.coupon.create({ data: {
       code: normalizedCode,
+=======
+    const exists = await prisma.coupon.findUnique({ where: { code } })
+    if (exists) return new Response(JSON.stringify({ error: 'Coupon exists' }), { status: 400 })
+
+    const created = await prisma.coupon.create({ data: {
+      code,
+>>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
       description,
       discount: parseFloat(discount),
       forNewUser: !!forNewUser,
