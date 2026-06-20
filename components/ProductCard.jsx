@@ -14,24 +14,23 @@ const ProductCard = ({ product }) => {
 
     // 🌟 Đcore GỘP THÔNG MINH: Hàm xử lý ảnh đa năng bốc tách chuỗi Base64, Static Import và chuỗi Array JSON
     const getImageUrl = (img) => {
-        if (!img) return "/placeholder.png"
+        if (!img) return "https://via.placeholder.com/500"
 
-        // Trường hợp 1: img là chuỗi văn bản (URL String, Base64 hoặc chuỗi mảng mã hóa)
         if (typeof img === 'string') {
-            if (img.trim() === "" || img === "null") return "/placeholder.png"
+            const trimmed = img.trim()
+            if (!trimmed || trimmed === "null") return "https://via.placeholder.com/500"
             try {
-                // Đề phòng dữ liệu bị đóng gói dạng chuỗi mảng JSON từ Database
-                if (img.startsWith('[') && img.endsWith(']')) {
-                    const parsed = JSON.parse(img)
+                if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                    const parsed = JSON.parse(trimmed)
                     const first = parsed[0]
-                    return (typeof first === 'object' ? first.src : first) || "/placeholder.png"
+                    const result = typeof first === 'object' ? first?.src : first
+                    return result || "https://via.placeholder.com/500"
                 }
             } catch (e) {}
-            return img // Trả về link string hoặc chuỗi Base64 trực tiếp
+            return trimmed
         }
 
-        // Trường hợp 2: img là Static Import (đối tượng tài nguyên ảnh của Next.js)
-        return img.src || img
+        return img?.src || "https://via.placeholder.com/500"
     }
 
     // Lấy phần tử ảnh đầu tiên trong mảng hoặc chuỗi
