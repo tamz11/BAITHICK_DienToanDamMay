@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "mysql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String    @id
+  name        String
+  email       String    @unique
+  password    String
+  image       String    @default("")
+  isActive    Boolean   @default(true)
+  role        Role      @default(CUSTOMER)
+  cart        Json
+  Address     Address[]
+  buyerOrders Order[]   @relation("BuyerRelation")
+  ratings     Rating[]
+  store       Store?
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  name        String
+  description String        @db.Text
+  mrp         Float
+  price       Float
+  images      String        @db.LongText
+  category    String
+  inStock     Boolean       @default(true)
+  stock       Int           @default(0)
+  isDeleted   Boolean       @default(false)
+  status      ProductStatus @default(PENDING)
+  storeId     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  orderItems  OrderItem[]
+  store       Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  rating      Rating[]
+
+  @@index([storeId], map: "Product_storeId_fkey")
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  total         Float
+  status        Order_status  @default(ORDER_PLACED)
+  userId        String
+  storeId       String
+  addressId     String
+  isPaid        Boolean       @default(false)
+  paymentMethod PaymentMethod
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  isCouponUsed  Boolean       @default(false)
+  coupon        Json
+  address       Address       @relation(fields: [addressId], references: [id])
+  store         Store         @relation(fields: [storeId], references: [id])
+  user          User          @relation("BuyerRelation", fields: [userId], references: [id])
+  orderItems    OrderItem[]
+
+  @@index([addressId], map: "Order_addressId_fkey")
+  @@index([storeId], map: "Order_storeId_fkey")
+  @@index([userId], map: "Order_userId_fkey")
+}
+
+model OrderItem {
+  orderId   String
+  productId String
+  quantity  Int
+  price     Float
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@id([orderId, productId])
+  @@index([productId], map: "OrderItem_productId_fkey")
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  rating    Int
+  review    String
+  userId    String
+  productId String
+  orderId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, orderId])
+  @@index([productId], map: "Rating_productId_fkey")
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  email     String
+  street    String
+  city      String
+  state     String
+  zip       String
+  country   String
+  phone     String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Order     Order[]
+
+  @@index([userId], map: "Address_userId_fkey")
+}
+
+model Coupon {
+  code        String   @id
+  description String
+  discount    Float
+  forNewUser  Boolean
+  forMember   Boolean  @default(false)
+  isPublic    Boolean
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+}
+
+model Store {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  name        String
+  description String
+  username    String    @unique
+  address     String
+  status      String    @default("pending")
+  isActive    Boolean   @default(false)
+  logo        String
+  email       String
+  contact     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  Order       Order[]
+  Product     Product[]
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+enum PaymentMethod {
+  COD
+  STRIPE
+}
+
+enum Role {
+  ADMIN
+  STORE_OWNER
+  STAFF
+  CUSTOMER
+}
+
+enum Order_status {
+  ORDER_PLACED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum ProductStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
