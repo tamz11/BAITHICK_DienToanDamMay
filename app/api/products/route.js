@@ -5,25 +5,25 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req) {
     try {
+        // Lấy query tham số category trên thanh URL (Ví dụ: ?category=Laptop)
         const { searchParams } = new URL(req.url);
         const category = searchParams.get('category');
 
-        // Gộp điều kiện: Chỉ lấy sản phẩm ĐÃ DUYỆT (của main) và CHƯA BỊ XÓA (của cả 2)
+        // Gộp điều kiện: Chỉ lấy sản phẩm ĐÃ DUYỆT và CHƯA BỊ XÓA MỀM
         const whereClause = {
             status: "APPROVED",
             isDeleted: false
         };
 
+        // Nếu khách chọn một danh mục cụ thể (và không phải là chọn 'all'), nạp thêm vào bộ lọc DB
         if (category && category !== 'all') {
             whereClause.category = category;
         }
-
-        // Gộp cả include 'rating' của bạn và 'store' của nhánh main
         const products = await prisma.product.findMany({
-            where: whereClause,
+            where: whereClause, // ➔ ĐÃ FIX 2: Truyền bộ lọc động vào đây để chạy được tính năng chọn danh mục
             include: {
-                rating: true, // Bảo vệ hàm .reduce() ở trang chủ của bạn không bị sập
-                store: {      // Lấy thông tin shop theo yêu cầu của nhánh main
+                rating: true,   // ➔ ĐÃ FIX 3: Chỉ giữ 1 dòng rating để tránh sập hàm .reduce() trang chủ của bạn
+                store: {        // Lấy thông tin shop theo đúng yêu cầu của nhánh main để hiển thị tên shop
                     select: {
                         name: true,
                         username: true
@@ -31,7 +31,7 @@ export async function GET(req) {
                 }
             },
             orderBy: {
-                createdAt: "desc" // Đẩy sản phẩm mới đăng lên đầu trang
+                createdAt: "desc" // Đẩy sản phẩm mới đăng lên đầu trang chủ
             }
         });
 

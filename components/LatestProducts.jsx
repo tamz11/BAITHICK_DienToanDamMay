@@ -1,50 +1,46 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import Title from './Title'
 import ProductCard from './ProductCard'
+// ➔ THÊM: Import useSelector để bốc dữ liệu từ Redux toàn cục theo kiến trúc mới của main
+import { useSelector } from 'react-redux' 
 
-// 1. Khai báo mảng dữ liệu mẫu (Mock data) cố định ở đây để "chống móm" cho giao diện
+// Mảng dữ liệu mẫu (Mock data) cố định của bạn để "chống móm" cho giao diện nếu DB trống
 const MOCK_PRODUCTS = [
-    { id: "mock-1", name: "Áo Hoodie Local Brand mẫu", price: 25, description: "Hàng mẫu", category: "Áo", images: "",rating: [] },
-    { id: "mock-2", name: "Giày Sneaker Thể Thao mẫu", price: 45, description: "Hàng mẫu", category: "Giày", images: "",rating: [] },
-    { id: "mock-3", name: "Balo Đi Học Chống Nước mẫu", price: 18, description: "Hàng mẫu", category: "Phụ kiện", images: "",rating: [] },
-    { id: "mock-4", name: "Nón Kết Thời Trang mẫu", price: 12, description: "Hàng mẫu", category: "Phụ kiện", images: "",rating: [] },
+    { id: "mock-1", name: "Áo Hoodie Local Brand mẫu", price: 25, description: "Hàng mẫu", category: "Áo", images: "", rating: [] },
+    { id: "mock-2", name: "Giày Sneaker Thể Thao mẫu", price: 45, description: "Hàng mẫu", category: "Giày", images: "", rating: [] },
+    { id: "mock-3", name: "Balo Đi Học Chống Nước mẫu", price: 18, description: "Hàng mẫu", category: "Phụ kiện", images: "", rating: [] },
+    { id: "mock-4", name: "Nón Kết Thời Trang mẫu", price: 12, description: "Hàng mẫu", category: "Phụ kiện", images: "", rating: [] },
 ];
 
 const LatestProducts = () => {
-    const displayQuantity = 4 // Cần hiển thị tối đa 4 sản phẩm
-    const [realProducts, setRealProducts] = useState([]) // Nơi chứa sản phẩm thật từ DB
-    const [loading, setLoading] = useState(true)
+    const displayQuantity = 4 // Chỉ hiển thị tối đa 4 sản phẩm ngoài trang chủ
 
-    useEffect(() => {
-        const fetchRealProducts = async () => {
-            try {
-                const res = await fetch('/api/products');
-                const data = await res.json();
-                if (res.ok) setRealProducts(data);
-            } catch (error) {
-                console.error("Lỗi lấy sản phẩm thật:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchRealProducts();
-    }, []);
+    // 🌟 Lấy danh sách sản phẩm thật từ Redux (Nhánh main đã cấu hình nạp tự động từ MySQL vào đây)
+    const storeProducts = useSelector(state => state.product.list) || []
 
-    // ➔ 2. ĐOẠN CODE PHỐI HỢP: Gộp hàng thật lên trước, hàng mẫu đứng sau
+    // ➔ Đcore GIỮ LẠI: Thuật toán sắp xếp an toàn theo thời gian tạo mới nhất của nhánh main
+    const sortedRealProducts = [...storeProducts].sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0
+        return dateB - dateA
+    })
+
+    // ➔ Đcore GỘP THÔNG MINH: Xếp hàng thật của DB lên đầu, hàng mẫu của bạn đứng xếp hàng chờ phía sau
     const combinedProducts = [
-        ...realProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)), // Hàng thật mới đăng lên đầu
-        ...MOCK_PRODUCTS // Hàng mẫu xếp hàng chờ phía sau
-    ].slice(0, displayQuantity); // Chỉ lấy đúng 4 sản phẩm đầu tiên để vẽ giao diện
-
-    if (loading) return <div className="text-center my-20 animate-pulse text-sm text-slate-400">Đang tải...</div>;
+        ...sortedRealProducts,
+        ...MOCK_PRODUCTS
+    ].slice(0, displayQuantity); // Luôn luôn cắt đúng 4 sản phẩm xuất sắc nhất ra màn hình
 
     return (
         <div className="px-6 my-30 max-w-6xl mx-auto">
+            {/* Sử dụng Component Title nâng cấp của nhánh main, tự động đếm tổng sản phẩm đang có */}
             <Title 
                 title="Sản phẩm mới nhất" 
-                         href="/shop" 
+                description={`Hiển thị ${combinedProducts.length} sản phẩm hot`}
+                href="/shop" 
             />
+            
             <div className="mt-12 grid grid-cols-2 sm:flex flex-wrap gap-6 justify-between">
                 {combinedProducts.map((product, index) => (
                     <ProductCard key={product.id || index} product={product} />
