@@ -1,31 +1,50 @@
+import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { requireAdmin } from '@/lib/adminAuth'
 
 export async function GET(req) {
   try {
     await requireAdmin(req)
-    const stores = await prisma.store.findMany({ orderBy: { createdAt: 'desc' } })
-    return new Response(JSON.stringify({ stores }))
+    const url = new URL(req.url)
+    const status = url.searchParams.get('status')
+
+    const where = {}
+    if (status) where.status = status
+
+    const stores = await prisma.store.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: { user: true }
+    })
+
+    return NextResponse.json({ stores })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message || err }), { status: err.status || 500 })
+    console.error('Admin get stores error:', err)
+    return NextResponse.json({ error: err.message || 'server error' }, { status: 500 })
   }
 }
 
 export async function PUT(req) {
   try {
     await requireAdmin(req)
-    const { storeId, isActive, status } = await req.json()
-    if (!storeId) return new Response(JSON.stringify({ error: 'Missing storeId' }), { status: 400 })
+    const body = await req.json()
+    const { storeId, status, isActive } = body
+    if (!storeId) return NextResponse.json({ error: 'storeId required' }, { status: 400 })
 
     const data = {}
     if (typeof isActive === 'boolean') data.isActive = isActive
     if (typeof status === 'string') data.status = status
 
-    if (!Object.keys(data).length) return new Response(JSON.stringify({ error: 'Nothing to update' }), { status: 400 })
+    // If admin approves, ensure isActive true
+    if (status === 'approved') data.isActive = true
+
+    if (!Object.keys(data).length) return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
 
     const updated = await prisma.store.update({ where: { id: storeId }, data })
-    return new Response(JSON.stringify({ store: updated }))
+
+    return NextResponse.json({ store: updated })
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message || err }), { status: err.status || 500 })
+    console.error('Admin update stores error:', err)
+    return NextResponse.json({ error: err.message || 'server error' }, { status: 500 })
   }
 }

@@ -1,8 +1,6 @@
 import bcrypt from 'bcryptjs'
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { nanoid } from 'nanoid'
-
-const prisma = new PrismaClient()
 
 export async function POST(req) {
   try {
@@ -34,36 +32,11 @@ export async function POST(req) {
         name, 
         email, 
         password: hashed,
-        role: (body.store && body.store.username) ? 'STORE_OWNER' : 'CUSTOMER',
+        role: 'CUSTOMER',
         cart: {}
       } 
     })
-
-    let storeCreated = null
-    if (body.store && body.store.username) {
-      const s = body.store
-      // create store application
-      try {
-        storeCreated = await prisma.store.create({ data: {
-          userId: user.id,
-          name: s.name || (user.name + "'s store"),
-          username: s.username,
-          description: s.description || '',
-          address: s.address || '',
-          status: 'pending',
-          isActive: false,
-          logo: s.logo || '',
-          email: s.email || user.email,
-          contact: s.contact || ''
-        }})
-      } catch (e) {
-        // if store creation fails (e.g., username duplicate), delete user and return error
-        await prisma.user.delete({ where: { id: user.id } }).catch(()=>{})
-        return new Response(JSON.stringify({ error: 'Lỗi tạo hồ sơ cửa hàng: ' + (e.message || e) }), { status: 400 })
-      }
-    }
-
-    return new Response(JSON.stringify({ message: 'Đăng ký thành công', user: { id: user.id, email: user.email, name: user.name }, store: storeCreated ? { id: storeCreated.id, status: storeCreated.status } : null }), { status: 201 })
+    return new Response(JSON.stringify({ message: 'Đăng ký thành công', user: { id: user.id, email: user.email, name: user.name }, store: null }), { status: 201 })
   } catch (err) {
     console.error('Signup error:', err)
     return new Response(JSON.stringify({ error: 'Lỗi đăng ký: ' + err.message }), { status: 500 })

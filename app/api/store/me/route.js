@@ -1,6 +1,8 @@
 import prisma from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '../auth/[...nextauth]/route'
+// Sử dụng đường dẫn tuyệt đối @/ để tránh lỗi "Module not found"
+
+import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 
 export async function GET(req) {
   try {

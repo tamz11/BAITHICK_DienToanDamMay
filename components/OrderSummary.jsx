@@ -1,31 +1,70 @@
+'use client'
 import { PlusIcon, SquarePenIcon, XIcon } from 'lucide-react';
 import React, { useState } from 'react'
 import AddressModal from './AddressModal';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { clearCart } from '@/lib/features/cart/cartSlice';
 
 const OrderSummary = ({ totalPrice, items }) => {
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '$';
 
     const router = useRouter();
+    const dispatch = useDispatch();
     const { data: session } = useSession();
 
-    const addressList = useSelector(state => state.address.list);
+    const addressList = useSelector(state => state.address.list) || [];
 
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [couponCodeInput, setCouponCodeInput] = useState('');
-    const [coupon, setCoupon] = useState('');
+    const [coupon, setCoupon] = useState(null);
+    const [loadingCoupon, setLoadingCoupon] = useState(false);
+    const [loadingOrder, setLoadingOrder] = useState(false);
 
+    // XỬ LÝ ÁP DỤNG MÃ GIẢM GIÁ
     const handleCouponCode = async (event) => {
         event.preventDefault();
         
+        if (!couponCodeInput.trim()) {
+            toast.error('Vui lòng nhập mã giảm giá');
+            return;
+        }
+
+        setLoadingCoupon(true);
+        try {
+            const response = await fetch('/api/coupons/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    code: couponCodeInput.trim(),
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Lỗi kiểm tra mã giảm giá');
+            }
+
+            setCoupon(data.data);
+            setCouponCodeInput('');
+            toast.success(`Áp dụng mã "${data.data.code}" thành công!`);
+        } catch (err) {
+            console.error('Coupon validation error:', err);
+            toast.error(err.message || 'Lỗi kiểm tra mã giảm giá');
+        } finally {
+            setLoadingCoupon(false);
+        }
     }
 
+    // XỬ LÝ ĐẶT HÀNG (ĐÃ CỨU VÀNG CẤU TRÚC CODE)
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
 
@@ -34,86 +73,195 @@ const OrderSummary = ({ totalPrice, items }) => {
             return;
         }
 
-        router.push('/orders')
+        if (!selectedAddress) {
+            toast.error('Vui lòng chọn địa chỉ giao hàng');
+            return;
+        }
+
+        if (!items || items.length === 0) {
+            toast.error('Giỏ hàng trống');
+            return;
+        }
+
+        const storeId = items[0]?.storeId;
+        if (!storeId) {
+            toast.error('Không tìm thấy cửa hàng');
+            return;
+        }
+
+        const orderItems = items.map(item => ({
+            productId: item.id,
+            quantity: item.quantity,
+            price: item.price,
+        }));
+
+        let finalPrice = totalPrice;
+        if (coupon) {
+            finalPrice = totalPrice - (coupon.discount / 100 * totalPrice);
+        }
+
+        setLoadingOrder(true);
+        try {
+            const response = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                // ➔ ĐÃ TỐI ƯU DỮ LIỆU ĐỊA CHỈ: Tương thích 100% với mọi kiểu bắt validation của Backend
+                body: JSON.stringify({
+                    addressId: selectedAddress?.id || null, 
+                    address: selectedAddress, 
+                    shippingAddress: {
+                        name: selectedAddress?.name || "",
+                        city: selectedAddress?.city || "",
+                        state: selectedAddress?.state || "",
+                        zip: selectedAddress?.zip || ""
+                    },
+                    paymentMethod,
+                    items: orderItems,
+                    coupon: coupon || null,
+                    totalPrice: finalPrice,
+                    storeId,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Lỗi đặt hàng');
+            }
+
+            // Xóa sạch giỏ hàng sau khi tạo đơn thành công
+            dispatch(clearCart());
+
+            // Thông báo rực rỡ cho người dùng
+            toast.success('Đặt hàng thành công!');
+
+            // Điều hướng mượt mà về trang quản lý đơn hàng của khách
+            setTimeout(() => {
+                router.push('/orders');
+            }, 1500);
+
+        } catch (err) {
+            console.error('Checkout error:', err);
+            toast.error(err.message || 'Lỗi đặt hàng');
+        } finally {
+            setLoadingOrder(false);
+        }
     }
 
     return (
-        <div className='w-full max-w-lg lg:max-w-[340px] bg-slate-50/30 border border-slate-200 text-slate-500 text-sm rounded-xl p-7'>
+        <div className='w-full max-w-lg lg:max-w-[340px] bg-slate-50/30 border border-slate-200 text-slate-500 text-sm rounded-xl p-7 shrink-0 h-fit'>
             <h2 className='text-xl font-medium text-slate-600'>Tóm tắt thanh toán</h2>
             <p className='text-slate-400 text-xs my-4'>Phương thức thanh toán</p>
             <div className='flex gap-2 items-center'>
-                <input type="radio" id="COD" onChange={() => setPaymentMethod('COD')} checked={paymentMethod === 'COD'} className='accent-gray-500' />
-                <label htmlFor="COD" className='cursor-pointer'>Thanh toán khi nhận hàng</label>
+                <input type="radio" id="COD" onChange={() => setPaymentMethod('COD')} checked={paymentMethod === 'COD'} className='accent-gray-500 cursor-pointer' />
+                <label htmlFor="COD" className='cursor-pointer select-none'>Thanh toán khi nhận hàng</label>
             </div>
             <div className='flex gap-2 items-center mt-1'>
-                <input type="radio" id="STRIPE" name='payment' onChange={() => setPaymentMethod('STRIPE')} checked={paymentMethod === 'STRIPE'} className='accent-gray-500' />
-                <label htmlFor="STRIPE" className='cursor-pointer'>Thanh toán bằng Stripe</label>
+                <input type="radio" id="STRIPE" name='payment' onChange={() => setPaymentMethod('STRIPE')} checked={paymentMethod === 'STRIPE'} className='accent-gray-500 cursor-pointer' />
+                <label htmlFor="STRIPE" className='cursor-pointer select-none'>Thanh toán bằng Stripe</label>
             </div>
+            
+            {/* KHUNG ĐỊA CHỈ */}
             <div className='my-4 py-4 border-y border-slate-200 text-slate-400'>
-                <p>Địa chỉ</p>
+                <p className="mb-2 text-xs">Địa chỉ nhận hàng</p>
                 {
                     selectedAddress ? (
-                        <div className='flex gap-2 items-center'>
-                            <p>{selectedAddress.name}, {selectedAddress.city}, {selectedAddress.state}, {selectedAddress.zip}</p>
-                            <SquarePenIcon onClick={() => setSelectedAddress(null)} className='cursor-pointer' size={18} />
+                        <div className='flex gap-3 items-center bg-slate-100/60 p-2.5 rounded-lg border border-slate-200 text-slate-700 justify-between'>
+                            <p className="text-xs font-medium leading-relaxed truncate flex-1">
+                                {selectedAddress.name}, {selectedAddress.city}, {selectedAddress.state}, {selectedAddress.zip}
+                            </p>
+                            <SquarePenIcon onClick={() => setSelectedAddress(null)} className='cursor-pointer text-slate-400 hover:text-slate-700 transition shrink-0' size={16} />
                         </div>
                     ) : (
                         <div>
                             {
                                 addressList.length > 0 && (
-                                    <select className='border border-slate-400 p-2 w-full my-3 outline-none rounded' onChange={(e) => setSelectedAddress(addressList[e.target.value])} >
-                                        <option value="">Chọn địa chỉ</option>
+                                    <select className='border border-slate-300 p-2 w-full my-2 outline-none rounded bg-white text-slate-700 text-xs cursor-pointer' onChange={(e) => {
+                                        if(e.target.value !== "") setSelectedAddress(addressList[e.target.value])
+                                    }} >
+                                        <option value="">-- Chọn địa chỉ có sẵn --</option>
                                         {
                                             addressList.map((address, index) => (
-                                                <option key={index} value={index}>{address.name}, {address.city}, {address.state}, {address.zip}</option>
+                                                <option key={index} value={index}>{address.name}, {address.city}, {address.state}</option>
                                             ))
                                         }
                                     </select>
                                 )
                             }
-                            <button className='flex items-center gap-1 text-slate-600 mt-1' onClick={() => setShowAddressModal(true)} >Thêm địa chỉ <PlusIcon size={18} /></button>
+                            <button className='flex items-center gap-1 text-xs text-slate-600 font-semibold mt-1 hover:text-slate-900 transition cursor-pointer' onClick={() => setShowAddressModal(true)} >
+                                Thêm địa chỉ mới <PlusIcon size={14} />
+                            </button>
                         </div>
                     )
                 }
             </div>
-            <div className='pb-4 border-b border-slate-200'>
+
+            {/* KHUNG TÍNH TOÁN TIỀN TỆ */}
+            <div className='pb-4 border-b border-slate-200 text-xs'>
                 <div className='flex justify-between'>
-                    <div className='flex flex-col gap-1 text-slate-400'>
+                    <div className='flex flex-col gap-2 text-slate-400'>
                         <p>Tổng phụ:</p>
                         <p>Vận chuyển:</p>
                         {coupon && <p>Mã giảm giá:</p>}
                     </div>
-                    <div className='flex flex-col gap-1 font-medium text-right'>
-                        <p>{currency}{totalPrice.toLocaleString()}</p>
-                        <p>Miễn phí</p>
-                        {coupon && <p>{`-${currency}${(coupon.discount / 100 * totalPrice).toFixed(2)}`}</p>}
+                    <div className='flex flex-col gap-2 font-medium text-right text-slate-700'>
+                        <p>{currency}{Number(totalPrice).toLocaleString()}</p>
+                        <p className="text-green-600 font-semibold">Miễn phí</p>
+                        {coupon && <p className="text-red-500">{`-${currency}${((coupon.discount / 100) * totalPrice).toFixed(2)}`}</p>}
                     </div>
                 </div>
+                
+                {/* NHẬP MÃ COUPON */}
                 {
                     !coupon ? (
-                        <form onSubmit={e => toast.promise(handleCouponCode(e), { loading: 'Đang kiểm tra mã...' })} className='flex justify-center gap-3 mt-3'>
-                            <input onChange={(e) => setCouponCodeInput(e.target.value)} value={couponCodeInput} type="text" placeholder='Mã giảm giá' className='border border-slate-400 p-1.5 rounded w-full outline-none' />
-                            <button className='bg-slate-600 text-white px-3 rounded hover:bg-slate-800 active:scale-95 transition-all'>Áp dụng</button>
+                        <form onSubmit={handleCouponCode} className='flex justify-center gap-2 mt-4'>
+                            <input 
+                                onChange={(e) => setCouponCodeInput(e.target.value)} 
+                                value={couponCodeInput} 
+                                type="text" 
+                                placeholder='Nhập mã giảm giá' 
+                                className='border border-slate-300 p-1.5 rounded text-xs w-full outline-none bg-white text-slate-700' 
+                                disabled={loadingCoupon}
+                            />
+                            <button 
+                                type='submit'
+                                disabled={loadingCoupon}
+                                className='bg-slate-700 text-white text-xs px-3 rounded hover:bg-slate-900 active:scale-95 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed cursor-pointer shrink-0'>
+                                {loadingCoupon ? 'Đang...' : 'Áp dụng'}
+                            </button>
                         </form>
                     ) : (
-                        <div className='w-full flex items-center justify-center gap-2 text-xs mt-2'>
-                            <p>Mã: <span className='font-semibold ml-1'>{coupon.code.toUpperCase()}</span></p>
-                            <p>{coupon.description}</p>
-                            <XIcon size={18} onClick={() => setCoupon('')} className='hover:text-red-700 transition cursor-pointer' />
+                        <div className='w-full flex items-center justify-between gap-2 text-xs mt-3 bg-green-50 text-green-800 p-2 rounded-lg border border-green-200'>
+                            <div className="truncate">
+                                <p className="font-bold">Mã: {coupon.code.toUpperCase()}</p>
+                                <p className="text-[11px] text-green-600 truncate">{coupon.description}</p>
+                            </div>
+                            <XIcon size={16} onClick={() => setCoupon(null)} className='hover:text-red-700 transition cursor-pointer shrink-0' />
                         </div>
                     )
                 }
             </div>
-            <div className='flex justify-between py-4'>
-                <p>Tổng cộng:</p>
-                <p className='font-medium text-right'>{currency}{coupon ? (totalPrice - (coupon.discount / 100 * totalPrice)).toFixed(2) : totalPrice.toLocaleString()}</p>
+
+            {/* TỔNG TIỀN CUỐI CÙNG & NÚT SUBMIT */}
+            <div className='flex justify-between py-4 items-center'>
+                <p className="font-medium text-slate-700">Tổng cộng:</p>
+                <p className='font-bold text-lg text-slate-900'>
+                    {currency}{coupon ? (totalPrice - ((coupon.discount / 100) * totalPrice)).toLocaleString(undefined, {maximumFractionDigits: 2}) : totalPrice.toLocaleString()}
+                </p>
             </div>
-            <button onClick={e => toast.promise(handlePlaceOrder(e), { loading: 'Đang đặt hàng...' })} className='w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all'>Đặt hàng</button>
+            
+            <button 
+                onClick={handlePlaceOrder} 
+                disabled={loadingOrder}
+                className='w-full bg-slate-800 text-white py-2.5 rounded-lg font-medium hover:bg-slate-900 active:scale-95 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed cursor-pointer text-sm shadow-sm'>
+                {loadingOrder ? 'Đang xử lý đặt hàng...' : 'Xác nhận Đặt hàng'}
+            </button>
 
             {showAddressModal && <AddressModal setShowAddressModal={setShowAddressModal} />}
-
         </div>
     )
 }
 
-export default OrderSummary
+export default OrderSummary;
