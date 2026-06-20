@@ -15,7 +15,6 @@ const ProductCard = ({ product }) => {
     const getImageUrl = (img) => {
         if (!img) return "https://via.placeholder.com/500"
 
-<<<<<<< HEAD
         if (typeof img === 'string') {
             const trimmed = img.trim()
             if (!trimmed || trimmed === "null") return "https://via.placeholder.com/500"
@@ -31,23 +30,6 @@ const ProductCard = ({ product }) => {
         }
 
         return img?.src || "https://via.placeholder.com/500"
-=======
-        // Trường hợp 1: img là chuỗi (URL hoặc JSON string từ DB)
-        if (typeof img === 'string') {
-            if (img.trim() === "" || img === "null") return "https://via.placeholder.com/500"
-            try {
-                if (img.startsWith('[') && img.endsWith(']')) {
-                    const parsed = JSON.parse(img)
-                    const first = parsed[0]
-                    return (typeof first === 'object' ? first.src : first) || "https://via.placeholder.com/500"
-                }
-            } catch (e) {}
-            return img
-        }
-
-        // Trường hợp 2: img là Static Import (đối tượng ảnh của Next.js)
-        return img.src || img
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
     }
 
     // Lấy ảnh đầu tiên
