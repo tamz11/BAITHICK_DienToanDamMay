@@ -26,7 +26,11 @@ const OrderSummary = ({ totalPrice, items }) => {
     const [loadingCoupon, setLoadingCoupon] = useState(false);
     const [loadingOrder, setLoadingOrder] = useState(false);
 
-    // XỬ LÝ ÁP DỤNG MÃ GIẢM GIÁ
+    // XỬ LÝ CHỌN ĐỊA CHỈ VÀ ÁP DỤNG MÃ GIẢM GIÁ
+    const handleSelectAddress = (event) => {
+        const address = addressList.find((item) => String(item.id) === String(event.target.value));
+        setSelectedAddress(address || null);
+    };
     const handleCouponCode = async (event) => {
         event.preventDefault();
         
@@ -39,11 +43,12 @@ const OrderSummary = ({ totalPrice, items }) => {
         try {
             const response = await fetch('/api/coupons/validate', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    code: couponCodeInput.trim(),
+                    code: couponCodeInput.replace(/\s+/g, '').toUpperCase(),
                 }),
             });
 
@@ -104,13 +109,14 @@ const OrderSummary = ({ totalPrice, items }) => {
         try {
             const response = await fetch('/api/checkout', {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                // ➔ ĐÃ TỐI ƯU DỮ LIỆU ĐỊA CHỈ: Tương thích 100% với mọi kiểu bắt validation của Backend
+                // Tối ưu dữ liệu địa chỉ cho backend: gửi cả shippingAddress và addressId an toàn
                 body: JSON.stringify({
-                    addressId: selectedAddress?.id || null, 
-                    address: selectedAddress, 
+                    addressId: selectedAddress?.id || null,
+                    address: selectedAddress,
                     shippingAddress: {
                         name: selectedAddress?.name || "",
                         city: selectedAddress?.city || "",
@@ -178,6 +184,7 @@ const OrderSummary = ({ totalPrice, items }) => {
                         <div>
                             {
                                 addressList.length > 0 && (
+<<<<<<< HEAD
                                     <select className='border border-slate-300 p-2 w-full my-2 outline-none rounded bg-white text-slate-700 text-xs cursor-pointer' onChange={(e) => {
                                         if(e.target.value !== "") setSelectedAddress(addressList[e.target.value])
                                     }} >
@@ -185,6 +192,13 @@ const OrderSummary = ({ totalPrice, items }) => {
                                         {
                                             addressList.map((address, index) => (
                                                 <option key={index} value={index}>{address.name}, {address.city}, {address.state}</option>
+=======
+                                    <select className='border border-slate-400 p-2 w-full my-3 outline-none rounded' value={selectedAddress?.id || ''} onChange={handleSelectAddress} >
+                                        <option value="">Chọn địa chỉ</option>
+                                        {
+                                            addressList.map((address) => (
+                                                <option key={address.id} value={address.id}>{address.name}, {address.city}, {address.state}, {address.zip}</option>
+>>>>>>> 9c80eba (cập nhật các chức năng buyẻ)
                                             ))
                                         }
                                     </select>

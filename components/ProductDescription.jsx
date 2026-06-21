@@ -8,6 +8,13 @@ const ProductDescription = ({ product }) => {
 
     const [selectedTab, setSelectedTab] = useState('Description')
     const ratingArray = product?.rating || [];
+    const getSafeImageUrl = (src) => {
+        if (!src) return '/favicon.ico'
+        if (typeof src !== 'string') return '/favicon.ico'
+        const trimmed = src.trim()
+        if (!trimmed || trimmed === 'null') return '/favicon.ico'
+        return trimmed
+    }
     return (
         <div className="my-18 text-sm text-slate-600">
 
@@ -35,8 +42,7 @@ const ProductDescription = ({ product }) => {
                     ) : 
                     ratingArray.map((item,index) => (
                         <div key={index} className="flex gap-5 mb-10">
-                            <img 
-                            src={item?.user?.image || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop&crop=face"} alt="" className="size-10 rounded-full" width={100} height={100} />
+                            <Image src={getSafeImageUrl(item?.user?.image)} alt={item?.user?.name || 'User avatar'} className="size-10 rounded-full" width={100} height={100} />
                             <div>
                                 <div className="flex items-center" >
                                     {Array(5).fill('').map((_, index) => (
@@ -54,7 +60,7 @@ const ProductDescription = ({ product }) => {
 
             {/* Store Page */}
             <div className="flex gap-3 mt-14">
-                <img src={product?.store?.logo || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face"} alt="" className="size-11 rounded-full ring ring-slate-400" width={100} height={100} />
+                <Image src={getSafeImageUrl(product?.store?.logo)} alt={product?.store?.name || 'Store logo'} className="size-11 rounded-full ring ring-slate-400" width={100} height={100} />
                 <div>
                     <p className="font-medium text-slate-600">Product by {product?.store?.name || "Happy Shop"}</p>
                     <Link href={`/shop/${product?.store?.username}`} className="flex items-center gap-1.5 text-green-500"> view store <ArrowRight size={14} /></Link>
