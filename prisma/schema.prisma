@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../app/generated/prisma" // Giữ lại đường dẫn custom để không bị lỗi Module not found
 }
 
 datasource db {
@@ -30,20 +31,23 @@ model Category {
 }
 
 model Product {
-  id          String        @id @default(cuid())
+
+  id          String      @id @default(cuid())
   name        String
   description String        @db.Text
   mrp         Float
   price       Float
-  images      String        @db.LongText
+  images      String      @db.LongText // Giữ lại @db.LongText để không bị lỗi tràn dữ liệu ảnh P2000
   category    String
   inStock     Boolean       @default(true)
-  stock       Int           @default(0)
-  isDeleted   Boolean       @default(false)
   status      ProductStatus @default(PENDING)
   storeId     String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  isDeleted   Boolean     @default(false) // Phục vụ chức năng xóa mềm sản phẩm
+  stock       Int         @default(0)     // Phục vụ quản lý số lượng kho hàng
+
   orderItems  OrderItem[]
   store       Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
   rating      Rating[]
@@ -168,6 +172,7 @@ enum Order_status {
   SHIPPED
   DELIVERED
   CANCELLED
+
 }
 
 enum ProductStatus {
