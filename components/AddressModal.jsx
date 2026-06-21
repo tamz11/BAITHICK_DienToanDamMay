@@ -1,18 +1,9 @@
 'use client'
 import { XIcon } from "lucide-react"
 import { useState } from "react"
-<<<<<<< HEAD
-import { useDispatch } from "react-redux"
-import { toast } from "react-hot-toast"
-import { addAddress } from "@/lib/features/address/addressSlice"
-
-const AddressModal = ({ setShowAddressModal }) => {
-    const dispatch = useDispatch();
-=======
 import { toast } from "react-hot-toast"
 
 const AddressModal = ({ setShowAddressModal }) => {
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
 
     const [address, setAddress] = useState({
         name: '',
@@ -35,27 +26,11 @@ const AddressModal = ({ setShowAddressModal }) => {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-<<<<<<< HEAD
-        const newAddress = {
-            ...address,
-            id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `addr_${Date.now()}`,
-            userId: '',
-            createdAt: new Date().toISOString(),
-        }
-
-        dispatch(addAddress(newAddress))
-        toast.success('Địa chỉ đã được thêm')
-=======
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
         setShowAddressModal(false)
     }
 
     return (
-<<<<<<< HEAD
-        <form onSubmit={handleSubmit} className="fixed inset-0 z-50 bg-white/60 backdrop-blur h-screen flex items-center justify-center">
-=======
         <form onSubmit={e => toast.promise(handleSubmit(e), { loading: 'Đang thêm địa chỉ...' })} className="fixed inset-0 z-50 bg-white/60 backdrop-blur h-screen flex items-center justify-center">
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
             <div className="flex flex-col gap-5 text-slate-700 w-full max-w-sm mx-6">
                 <h2 className="text-3xl ">Thêm <span className="font-semibold">Địa chỉ</span> Mới</h2>
                 <input name="name" onChange={handleAddressChange} value={address.name} className="p-2 px-4 outline-none border border-slate-200 rounded w-full" type="text" placeholder="Enter your name" required />

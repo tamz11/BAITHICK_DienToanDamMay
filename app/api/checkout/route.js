@@ -19,12 +19,7 @@ export async function POST(req) {
       coupon,
       totalPrice,
       storeId,
-<<<<<<< HEAD
-      address: addressData,
-    } = await req.json();
-=======
     } = await req.json()
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
 
     // Validate required fields
     if (!addressId || !paymentMethod || !items || !Array.isArray(items) || items.length === 0 || !storeId) {
@@ -55,45 +50,11 @@ export async function POST(req) {
     }
 
     // Validate address
-<<<<<<< HEAD
-    let existingAddress = await prisma.address.findUnique({
-      where: { id: addressId },
-    });
-
-    if (!existingAddress && addressId && addressData && typeof addressData === 'object') {
-      const requiredFields = ['name', 'email', 'street', 'city', 'state', 'zip', 'country', 'phone']
-      const validAddress = requiredFields.every((field) => Boolean(addressData[field]))
-      if (!validAddress) {
-        return new Response(
-          JSON.stringify({ error: 'Địa chỉ không hợp lệ' }),
-          { status: 400 }
-        )
-      }
-
-      existingAddress = await prisma.address.create({
-        data: {
-          id: addressId,
-          userId: user.id,
-          name: addressData.name,
-          email: addressData.email,
-          street: addressData.street,
-          city: addressData.city,
-          state: addressData.state,
-          zip: addressData.zip,
-          country: addressData.country,
-          phone: addressData.phone,
-        },
-      })
-    }
-
-    if (!existingAddress || existingAddress.userId !== user.id) {
-=======
     const address = await prisma.address.findUnique({
       where: { id: addressId },
     })
 
     if (!address || address.userId !== user.id) {
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
       return new Response(
         JSON.stringify({ error: 'Địa chỉ không hợp lệ' }),
         { status: 400 }
@@ -104,17 +65,6 @@ export async function POST(req) {
     const productIds = items.map(item => item.productId)
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-<<<<<<< HEAD
-    });
-
-    if (products.length !== items.length) {
-      const foundIds = products.map(p => p.id);
-      const missing = productIds.filter(id => !foundIds.includes(id));
-      return new Response(
-        JSON.stringify({ error: 'Một số sản phẩm không tồn tại', missing }),
-        { status: 400 }
-      );
-=======
     })
 
     if (products.length !== items.length) {
@@ -122,7 +72,6 @@ export async function POST(req) {
         JSON.stringify({ error: 'Một số sản phẩm không tồn tại' }),
         { status: 400 }
       )
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
     }
 
     // Validate stock
@@ -139,16 +88,9 @@ export async function POST(req) {
     // Validate coupon if provided
     let couponData = null
     if (coupon && coupon.code) {
-<<<<<<< HEAD
-      const normalizedCode = String(coupon.code).replace(/\s+/g, '').toUpperCase();
-      const couponRecord = await prisma.coupon.findUnique({
-        where: { code: normalizedCode },
-      });
-=======
       const couponRecord = await prisma.coupon.findUnique({
         where: { code: coupon.code.toUpperCase() },
       })
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
 
       if (!couponRecord || new Date(couponRecord.expiresAt) < new Date()) {
         return new Response(
