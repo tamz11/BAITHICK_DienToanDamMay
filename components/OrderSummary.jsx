@@ -31,10 +31,9 @@ const OrderSummary = ({ totalPrice, items }) => {
         const address = addressList.find((item) => String(item.id) === String(event.target.value));
         setSelectedAddress(address || null);
     };
-
     const handleCouponCode = async (event) => {
         event.preventDefault();
-
+        
         if (!couponCodeInput.trim()) {
             toast.error('Vui lòng nhập mã giảm giá');
             return;
@@ -70,7 +69,7 @@ const OrderSummary = ({ totalPrice, items }) => {
         }
     }
 
-    // XỬ LÝ ĐẶT HÀNG
+    // XỬ LÝ ĐẶT HÀNG (ĐÃ CỨU VÀNG CẤU TRÚC CODE)
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
 
@@ -114,6 +113,7 @@ const OrderSummary = ({ totalPrice, items }) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                // Tối ưu dữ liệu địa chỉ cho backend: gửi cả shippingAddress và addressId an toàn
                 body: JSON.stringify({
                     addressId: selectedAddress?.id || null,
                     address: selectedAddress,
@@ -137,9 +137,17 @@ const OrderSummary = ({ totalPrice, items }) => {
                 throw new Error(data.error || 'Lỗi đặt hàng');
             }
 
+            // Xóa sạch giỏ hàng sau khi tạo đơn thành công
             dispatch(clearCart());
+
+            // Thông báo rực rỡ cho người dùng
             toast.success('Đặt hàng thành công!');
-            setTimeout(() => router.push('/orders'), 1500);
+
+            // Điều hướng mượt mà về trang quản lý đơn hàng của khách
+            setTimeout(() => {
+                router.push('/orders');
+            }, 1500);
+
         } catch (err) {
             console.error('Checkout error:', err);
             toast.error(err.message || 'Lỗi đặt hàng');
@@ -160,31 +168,51 @@ const OrderSummary = ({ totalPrice, items }) => {
                 <input type="radio" id="STRIPE" name='payment' onChange={() => setPaymentMethod('STRIPE')} checked={paymentMethod === 'STRIPE'} className='accent-gray-500 cursor-pointer' />
                 <label htmlFor="STRIPE" className='cursor-pointer select-none'>Thanh toán bằng Stripe</label>
             </div>
-
+            
+            {/* KHUNG ĐỊA CHỈ */}
             <div className='my-4 py-4 border-y border-slate-200 text-slate-400'>
                 <p className="mb-2 text-xs">Địa chỉ nhận hàng</p>
-                {selectedAddress ? (
-                    <div className='flex gap-3 items-center bg-slate-100/60 p-2.5 rounded-lg border border-slate-200 text-slate-700 justify-between'>
-                        <p className="text-xs font-medium leading-relaxed truncate flex-1">{selectedAddress.name}, {selectedAddress.city}, {selectedAddress.state}, {selectedAddress.zip}</p>
-                        <SquarePenIcon onClick={() => setSelectedAddress(null)} className='cursor-pointer text-slate-400 hover:text-slate-700 transition shrink-0' size={16} />
-                    </div>
-                ) : (
-                    <div>
-                        {addressList.length > 0 && (
-                            <select className='border border-slate-400 p-2 w-full my-3 outline-none rounded' value={selectedAddress?.id || ''} onChange={handleSelectAddress}>
-                                <option value="">Chọn địa chỉ</option>
-                                {addressList.map(address => (
-                                    <option key={address.id} value={address.id}>{address.name}, {address.city}, {address.state}, {address.zip}</option>
-                                ))}
-                            </select>
-                        )}
-                        <button className='flex items-center gap-1 text-xs text-slate-600 font-semibold mt-1 hover:text-slate-900 transition cursor-pointer' onClick={() => setShowAddressModal(true)}>
-                            Thêm địa chỉ mới <PlusIcon size={14} />
-                        </button>
-                    </div>
-                )}
+                {
+                    selectedAddress ? (
+                        <div className='flex gap-3 items-center bg-slate-100/60 p-2.5 rounded-lg border border-slate-200 text-slate-700 justify-between'>
+                            <p className="text-xs font-medium leading-relaxed truncate flex-1">
+                                {selectedAddress.name}, {selectedAddress.city}, {selectedAddress.state}, {selectedAddress.zip}
+                            </p>
+                            <SquarePenIcon onClick={() => setSelectedAddress(null)} className='cursor-pointer text-slate-400 hover:text-slate-700 transition shrink-0' size={16} />
+                        </div>
+                    ) : (
+                        <div>
+                            {
+                                addressList.length > 0 && (
+<<<<<<< HEAD
+                                    <select className='border border-slate-300 p-2 w-full my-2 outline-none rounded bg-white text-slate-700 text-xs cursor-pointer' onChange={(e) => {
+                                        if(e.target.value !== "") setSelectedAddress(addressList[e.target.value])
+                                    }} >
+                                        <option value="">-- Chọn địa chỉ có sẵn --</option>
+                                        {
+                                            addressList.map((address, index) => (
+                                                <option key={index} value={index}>{address.name}, {address.city}, {address.state}</option>
+=======
+                                    <select className='border border-slate-400 p-2 w-full my-3 outline-none rounded' value={selectedAddress?.id || ''} onChange={handleSelectAddress} >
+                                        <option value="">Chọn địa chỉ</option>
+                                        {
+                                            addressList.map((address) => (
+                                                <option key={address.id} value={address.id}>{address.name}, {address.city}, {address.state}, {address.zip}</option>
+>>>>>>> 9c80eba (cập nhật các chức năng buyẻ)
+                                            ))
+                                        }
+                                    </select>
+                                )
+                            }
+                            <button className='flex items-center gap-1 text-xs text-slate-600 font-semibold mt-1 hover:text-slate-900 transition cursor-pointer' onClick={() => setShowAddressModal(true)} >
+                                Thêm địa chỉ mới <PlusIcon size={14} />
+                            </button>
+                        </div>
+                    )
+                }
             </div>
 
+            {/* KHUNG TÍNH TOÁN TIỀN TỆ */}
             <div className='pb-4 border-b border-slate-200 text-xs'>
                 <div className='flex justify-between'>
                     <div className='flex flex-col gap-2 text-slate-400'>
@@ -198,28 +226,50 @@ const OrderSummary = ({ totalPrice, items }) => {
                         {coupon && <p className="text-red-500">{`-${currency}${((coupon.discount / 100) * totalPrice).toFixed(2)}`}</p>}
                     </div>
                 </div>
-
-                {!coupon ? (
-                    <form onSubmit={handleCouponCode} className='flex justify-center gap-2 mt-4'>
-                        <input onChange={(e) => setCouponCodeInput(e.target.value)} value={couponCodeInput} type="text" placeholder='Nhập mã giảm giá' className='border border-slate-300 p-1.5 rounded text-xs w-full outline-none bg-white text-slate-700' disabled={loadingCoupon} />
-                        <button type='submit' disabled={loadingCoupon} className='bg-slate-700 text-white text-xs px-3 rounded hover:bg-slate-900 active:scale-95 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed cursor-pointer shrink-0'>
-                            {loadingCoupon ? 'Đang...' : 'Áp dụng'}
-                        </button>
-                    </form>
-                ) : (
-                    <div className='w-full flex items-center justify-between gap-2 text-xs mt-3 bg-green-50 text-green-800 p-2 rounded-lg border border-green-200'>
-                        <div className="truncate"><p className="font-bold">Mã: {coupon.code.toUpperCase()}</p><p className="text-[11px] text-green-600 truncate">{coupon.description}</p></div>
-                        <XIcon size={16} onClick={() => setCoupon(null)} className='hover:text-red-700 transition cursor-pointer shrink-0' />
-                    </div>
-                )}
+                
+                {/* NHẬP MÃ COUPON */}
+                {
+                    !coupon ? (
+                        <form onSubmit={handleCouponCode} className='flex justify-center gap-2 mt-4'>
+                            <input 
+                                onChange={(e) => setCouponCodeInput(e.target.value)} 
+                                value={couponCodeInput} 
+                                type="text" 
+                                placeholder='Nhập mã giảm giá' 
+                                className='border border-slate-300 p-1.5 rounded text-xs w-full outline-none bg-white text-slate-700' 
+                                disabled={loadingCoupon}
+                            />
+                            <button 
+                                type='submit'
+                                disabled={loadingCoupon}
+                                className='bg-slate-700 text-white text-xs px-3 rounded hover:bg-slate-900 active:scale-95 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed cursor-pointer shrink-0'>
+                                {loadingCoupon ? 'Đang...' : 'Áp dụng'}
+                            </button>
+                        </form>
+                    ) : (
+                        <div className='w-full flex items-center justify-between gap-2 text-xs mt-3 bg-green-50 text-green-800 p-2 rounded-lg border border-green-200'>
+                            <div className="truncate">
+                                <p className="font-bold">Mã: {coupon.code.toUpperCase()}</p>
+                                <p className="text-[11px] text-green-600 truncate">{coupon.description}</p>
+                            </div>
+                            <XIcon size={16} onClick={() => setCoupon(null)} className='hover:text-red-700 transition cursor-pointer shrink-0' />
+                        </div>
+                    )
+                }
             </div>
 
+            {/* TỔNG TIỀN CUỐI CÙNG & NÚT SUBMIT */}
             <div className='flex justify-between py-4 items-center'>
                 <p className="font-medium text-slate-700">Tổng cộng:</p>
-                <p className='font-bold text-lg text-slate-900'>{currency}{coupon ? (totalPrice - ((coupon.discount / 100) * totalPrice)).toLocaleString(undefined, {maximumFractionDigits: 2}) : totalPrice.toLocaleString()}</p>
+                <p className='font-bold text-lg text-slate-900'>
+                    {currency}{coupon ? (totalPrice - ((coupon.discount / 100) * totalPrice)).toLocaleString(undefined, {maximumFractionDigits: 2}) : totalPrice.toLocaleString()}
+                </p>
             </div>
-
-            <button onClick={handlePlaceOrder} disabled={loadingOrder} className='w-full bg-slate-800 text-white py-2.5 rounded-lg font-medium hover:bg-slate-900 active:scale-95 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed cursor-pointer text-sm shadow-sm'>
+            
+            <button 
+                onClick={handlePlaceOrder} 
+                disabled={loadingOrder}
+                className='w-full bg-slate-800 text-white py-2.5 rounded-lg font-medium hover:bg-slate-900 active:scale-95 transition-all disabled:bg-slate-400 disabled:cursor-not-allowed cursor-pointer text-sm shadow-sm'>
                 {loadingOrder ? 'Đang xử lý đặt hàng...' : 'Xác nhận Đặt hàng'}
             </button>
 
@@ -228,4 +278,4 @@ const OrderSummary = ({ totalPrice, items }) => {
     )
 }
 
-export default OrderSummary
+export default OrderSummary;

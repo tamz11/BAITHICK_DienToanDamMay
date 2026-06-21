@@ -19,13 +19,8 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
             toast.error('Vui lòng chọn đánh giá từ 1 đến 5 sao');
             return;
         }
-<<<<<<< HEAD
-        if (review && review.trim().length > 0 && review.trim().length < 5) {
-            toast.error('Nhận xét phải có ít nhất 5 ký tự nếu nhập');
-=======
         if (review.length < 5) {
             toast.error('Nhận xét phải có ít nhất 5 ký tự');
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
             return;
         }
 
@@ -33,10 +28,6 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
         try {
             const response = await fetch('/api/ratings', {
                 method: 'POST',
-<<<<<<< HEAD
-                credentials: 'include',
-=======
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -44,11 +35,7 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
                     productId: ratingModal?.productId,
                     orderId: ratingModal?.orderId,
                     rating,
-<<<<<<< HEAD
-                    review: review.trim(),
-=======
                     review,
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
                 }),
             });
 
@@ -89,11 +76,7 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
                 </div>
                 <textarea
                     className='w-full p-2 border border-gray-300 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-green-400'
-<<<<<<< HEAD
-                    placeholder='Viết nhận xét (tùy chọn)'
-=======
                     placeholder='Viếp nhận xét (tuy chọn)'
->>>>>>> 5e6f11fbe23afe2ef2180f979c7d843b9b483f09
                     rows='4'
                     value={review}
                     onChange={(e) => setReview(e.target.value)}
