@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { Loader2, ImageIcon, SquarePen, Trash2, X, PlusCircle, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { Loader2, ImageIcon, SquarePen, Trash2, X, PlusCircle, CheckCircle2, AlertCircle, Clock, PackageOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function AddProductPage() {
