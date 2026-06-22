@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth/next'
 import prisma from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { createZohoOrderTask } from '@/lib/zoho' // 🌟 Import Zoho helper
 
 export async function POST(req) {
   try {
@@ -21,7 +22,7 @@ export async function POST(req) {
       storeId,
     } = await req.json()
 
-    // Validate required fields
+    // 1. Kiểm tra thông tin bắt buộc
     if (!addressId || !paymentMethod || !items || !Array.isArray(items) || items.length === 0 || !storeId) {
       return new Response(
         JSON.stringify({ error: 'Thông tin đơn hàng không đầy đủ' }),
@@ -29,83 +30,39 @@ export async function POST(req) {
       )
     }
 
-    // Validate payment method
-    if (!['COD', 'STRIPE'].includes(paymentMethod)) {
-      return new Response(
-        JSON.stringify({ error: 'Phương thức thanh toán không hợp lệ' }),
-        { status: 400 }
-      )
-    }
-
-    // Get user
+    // 2. Lấy thông tin người dùng và địa chỉ chi tiết
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
+      include: { buyerOrders: true }
     })
 
-    if (!user) {
+    const address = await prisma.address.findUnique({
+      where: { id: addressId }
+    })
+
+    if (!user || !address) {
       return new Response(
-        JSON.stringify({ error: 'Người dùng không tồn tại' }),
+        JSON.stringify({ error: 'Người dùng hoặc địa chỉ không tồn tại' }),
         { status: 404 }
       )
     }
 
-    // Validate address
-    const address = await prisma.address.findUnique({
-      where: { id: addressId },
-    })
+    // LOGIC PHÂN LOẠI NGƯỜI DÙNG
+    const currentOrderCount = user.buyerOrders.length;
+    let userType = currentOrderCount >= 2 ? "MEMBER" : "NEW_USER";
 
-    if (!address || address.userId !== user.id) {
-      return new Response(
-        JSON.stringify({ error: 'Địa chỉ không hợp lệ' }),
-        { status: 400 }
-      )
-    }
-
-    // Validate products and stock
-    const productIds = items.map(item => item.productId)
-    const products = await prisma.product.findMany({
-      where: { id: { in: productIds } },
-    })
-
-    if (products.length !== items.length) {
-      return new Response(
-        JSON.stringify({ error: 'Một số sản phẩm không tồn tại' }),
-        { status: 400 }
-      )
-    }
-
-    // Validate stock
-    for (const item of items) {
-      const product = products.find(p => p.id === item.productId)
-      if (!product || product.stock < item.quantity) {
-        return new Response(
-          JSON.stringify({ error: `Sản phẩm "${product?.name}" không đủ hàng` }),
-          { status: 400 }
-        )
-      }
-    }
-
-    // Validate coupon if provided
+    // 3. Kiểm tra mã giảm giá
     let couponData = null
     if (coupon && coupon.code) {
       const couponRecord = await prisma.coupon.findUnique({
         where: { code: coupon.code.toUpperCase() },
       })
-
-      if (!couponRecord || new Date(couponRecord.expiresAt) < new Date()) {
-        return new Response(
-          JSON.stringify({ error: 'Mã giảm giá không hợp lệ hoặc hết hạn' }),
-          { status: 400 }
-        )
-      }
-      couponData = {
-        code: couponRecord.code,
-        description: couponRecord.description,
-        discount: couponRecord.discount,
+      if (couponRecord) {
+        couponData = { code: couponRecord.code, description: couponRecord.description, discount: couponRecord.discount }
       }
     }
 
-    // Create order
+    // 4. Tạo đơn hàng vào Database
     const order = await prisma.order.create({
       data: {
         total: totalPrice,
@@ -114,7 +71,7 @@ export async function POST(req) {
         storeId,
         addressId,
         paymentMethod,
-        isPaid: paymentMethod === 'STRIPE' ? false : false, // For COD: false, For Stripe: false initially
+        isPaid: false,
         isCouponUsed: !!couponData,
         coupon: couponData || {},
         orderItems: {
@@ -129,37 +86,42 @@ export async function POST(req) {
       },
       include: {
         orderItems: {
-          include: {
-            product: true,
-          },
-        },
-        address: true,
-        store: true,
-      },
+          include: { product: true }
+        }
+      }
     })
 
-    // Update product stock
+    // 5. Cập nhật kho hàng
     for (const item of items) {
       await prisma.product.update({
         where: { id: item.productId },
-        data: {
-          stock: {
-            decrement: item.quantity,
-          },
-        },
+        data: { stock: { decrement: item.quantity } }
       })
     }
+
+    // 🌟 6. TÍCH HỢP ZOHO PROJECTS: Tạo Task đơn hàng mới với đầy đủ thông tin
+    const zohoOrderData = {
+        orderId: order.id,
+        customerName: address.name,
+        phone: address.phone,
+        address: `${address.street}, ${address.city}, ${address.state}`,
+        total: totalPrice,
+        items: order.orderItems.map(item => ({
+            name: item.product.name,
+            quantity: item.quantity
+        }))
+    };
+
+    // Gọi bất đồng bộ để không treo UI khách hàng
+    createZohoOrderTask(zohoOrderData).catch(err => console.error("Zoho Order Task Error:", err));
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Đặt hàng thành công',
-        data: {
-          orderId: order.id,
-          total: order.total,
-          status: order.status,
-          paymentMethod: order.paymentMethod,
-        },
+        message: userType === "MEMBER" && currentOrderCount === 2
+            ? 'Chúc mừng! Bạn đã trở thành Thành viên sau đơn hàng này.'
+            : 'Đặt hàng thành công',
+        data: { orderId: order.id, userType },
       }),
       { status: 201 }
     )

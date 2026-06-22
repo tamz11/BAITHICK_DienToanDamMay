@@ -1,6 +1,6 @@
 'use client'
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, Package, ShoppingCart, MessageSquare, Truck, LogOut } from "lucide-react"
+import { LayoutDashboard, Package, ShoppingCart, MessageSquare, LogOut } from "lucide-react"
 import Link from "next/link"
 import { signOut } from "next-auth/react"
 
@@ -11,8 +11,7 @@ const StaffSidebar = () => {
         { name: 'Dashboard', href: '/staff', icon: LayoutDashboard },
         { name: 'Duyệt Sản phẩm', href: '/staff/products', icon: Package },
         { name: 'Đơn hàng', href: '/staff/orders', icon: ShoppingCart },
-        { name: 'Vận chuyển', href: '/staff/shipping', icon: Truck },
-        { name: 'Hỗ trợ khách', href: '/staff/support', icon: MessageSquare },
+        { name: 'Chat khách hàng', href: 'https://salesiq.zoho.com', icon: MessageSquare },
     ]
 
     return (
@@ -22,6 +21,7 @@ const StaffSidebar = () => {
                     <Link
                         key={link.href}
                         href={link.href}
+                        target={link.href.startsWith('http') ? "_blank" : undefined}
                         className={`flex items-center gap-3 px-6 py-3 text-sm font-medium transition-colors ${
                             pathname === link.href
                             ? 'bg-blue-50 text-blue-600 border-r-4 border-blue-600'
