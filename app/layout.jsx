@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
                         <Toaster />
                         {children}
 
-                        {/* Zoho SalesIQ Integration - Chat với Staff bằng tiếng Việt */}
+                            {/* Zoho SalesIQ Integration - Chat với Staff bằng tiếng Việt */}
                         <Script id="zoho-salesiq-init" strategy="afterInteractive">
                             {`
                                 window.$zoho=window.$zoho || {};
