@@ -30,9 +30,7 @@ export default function Home() {
     return (
         <div>
             <Hero />
-            <section className="update-banner bg-blue-50 text-blue-900 p-4 rounded-md my-6 text-center">
-                <p className="font-semibold">Cập nhật nhẹ: đây là phiên bản giao diện mới với nội dung hiển thị khác biệt.</p>
-            </section>
+            
             <LatestProducts />
             <BestSelling />
             <OurSpecs />

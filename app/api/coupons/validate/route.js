@@ -49,16 +49,23 @@ export async function POST(req) {
       )
     }
 
-    // Check if coupon is for new users
+    // Check if coupon is for new users or members
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } })
+    const ordersCount = user ? await prisma.order.count({ where: { userId: user.id } }) : 0
+
     if (coupon.forNewUser) {
-      const userOrders = await prisma.order.findFirst({
-        where: {
-          user: { email: session.user.email },
-        },
-      })
-      if (userOrders) {
+      if (ordersCount > 0) {
         return new Response(
           JSON.stringify({ error: 'Mã này chỉ dành cho khách hàng mới' }),
+          { status: 400 }
+        )
+      }
+    }
+
+    if (coupon.forMember) {
+      if (ordersCount < 3) {
+        return new Response(
+          JSON.stringify({ error: 'Mã này chỉ dành cho hội viên (cần >= 3 đơn)' }),
           { status: 400 }
         )
       }

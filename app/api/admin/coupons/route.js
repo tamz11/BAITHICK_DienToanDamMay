@@ -17,12 +17,13 @@ export async function POST(req) {
     const body = await req.json()
     const { code, description, discount, forNewUser = false, forMember = false, isPublic = false, expiresAt } = body
     if (!code || !description || !discount || !expiresAt) return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400 })
+    const codeUpper = String(code).replace(/\s+/g, '').toUpperCase()
 
-    const exists = await prisma.coupon.findUnique({ where: { code } })
+    const exists = await prisma.coupon.findUnique({ where: { code: codeUpper } })
     if (exists) return new Response(JSON.stringify({ error: 'Coupon exists' }), { status: 400 })
 
     const created = await prisma.coupon.create({ data: {
-      code,
+      code: codeUpper,
       description,
       discount: parseFloat(discount),
       forNewUser: !!forNewUser,
@@ -43,7 +44,8 @@ export async function DELETE(req) {
     const body = await req.json()
     const { code } = body
     if (!code) return new Response(JSON.stringify({ error: 'Missing code' }), { status: 400 })
-    await prisma.coupon.delete({ where: { code } })
+    const codeUpper = String(code).replace(/\s+/g, '').toUpperCase()
+    await prisma.coupon.delete({ where: { code: codeUpper } })
     return new Response(JSON.stringify({ success: true }))
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message || err }), { status: err.status || 500 })
