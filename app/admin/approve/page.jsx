@@ -12,14 +12,40 @@ export default function AdminApprove() {
 
 
     const fetchStores = async () => {
-        setStores(storesDummyData)
-        setLoading(false)
+        setLoading(true)
+        try {
+            const res = await fetch('/api/admin/stores?status=pending', { credentials: 'include' })
+            const data = await res.json()
+            if (!res.ok) {
+                console.error('Failed to fetch pending stores', data)
+                setStores([])
+            } else {
+                setStores(data.stores || [])
+            }
+        } catch (err) {
+            console.error('Fetch stores error', err)
+            setStores([])
+        } finally {
+            setLoading(false)
+        }
     }
 
     const handleApprove = async ({ storeId, status }) => {
-        // Logic to approve a store
-
-
+        try {
+            const res = await fetch('/api/admin/stores', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ storeId, status })
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'Lỗi hệ thống')
+            await fetchStores()
+            return data
+        } catch (err) {
+            console.error('Approve error', err)
+            throw err
+        }
     }
 
     useEffect(() => {
