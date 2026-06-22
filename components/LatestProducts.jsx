@@ -37,7 +37,7 @@ const LatestProducts = () => {
             {/* Sử dụng Component Title nâng cấp của nhánh main, tự động đếm tổng sản phẩm đang có */}
             <Title 
                 title="Sản phẩm mới nhất" 
-                description={`Hiển thị ${combinedProducts.length} sản phẩm hot`}
+                description={`Hiển thị ${combinedProducts.length} sản phẩm nổi bật`}
                 href="/shop" 
             />
             

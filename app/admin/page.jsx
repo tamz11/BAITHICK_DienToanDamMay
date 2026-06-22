@@ -15,19 +15,49 @@ export default function AdminDashboard() {
         revenue: 0,
         orders: 0,
         stores: 0,
+        pendingStores: 0,
+        users: 0,
         allOrders: [],
+        byMonth: [],
+        byYear: []
     })
+
+    const [granularity, setGranularity] = useState('day')
 
     const dashboardCardsData = [
         { title: 'Tổng sản phẩm', value: dashboardData.products, icon: ShoppingBasketIcon },
         { title: 'Tổng doanh thu', value: currency + dashboardData.revenue, icon: CircleDollarSignIcon },
         { title: 'Tổng đơn hàng', value: dashboardData.orders, icon: TagsIcon },
         { title: 'Tổng cửa hàng', value: dashboardData.stores, icon: StoreIcon },
+        { title: 'Chờ duyệt', value: dashboardData.pendingStores, icon: StoreIcon },
+        { title: 'Người dùng', value: dashboardData.users, icon: TagsIcon },
     ]
 
     const fetchDashboardData = async () => {
-        setDashboardData(dummyAdminDashboardData)
-        setLoading(false)
+        setLoading(true)
+        try {
+            const res = await fetch('/api/admin/dashboard', { credentials: 'include' })
+            const data = await res.json()
+            if (!res.ok) {
+                console.error('Failed to fetch dashboard data', data)
+                // fallback to dummy if available
+                setDashboardData((prev) => ({ ...prev }))
+            } else {
+                setDashboardData({
+                    products: data.totalProducts || 0,
+                    revenue: data.totalRevenue || 0,
+                    orders: data.totalOrders || 0,
+                    stores: data.totalStores || 0,
+                    pendingStores: data.pendingStores || 0,
+                    users: data.totalUsers || 0,
+                    allOrders: data.byDay || [],
+                })
+            }
+        } catch (err) {
+            console.error('Fetch dashboard error', err)
+        } finally {
+            setLoading(false)
+        }
     }
 
     useEffect(() => {
@@ -56,7 +86,15 @@ export default function AdminDashboard() {
             </div>
 
             {/* Area Chart */}
-            <OrdersAreaChart allOrders={dashboardData.allOrders} />
+            <div className="flex items-center gap-3 mb-3">
+                <label className="text-sm text-slate-600">Xem theo:</label>
+                <select value={granularity} onChange={(e)=>setGranularity(e.target.value)} className="border px-2 py-1 rounded text-sm">
+                    <option value="day">Ngày</option>
+                    <option value="month">Tháng</option>
+                    <option value="year">Năm</option>
+                </select>
+            </div>
+            <OrdersAreaChart granularity={granularity} allOrders={granularity === 'day' ? dashboardData.allOrders : (granularity === 'month' ? dashboardData.byMonth : dashboardData.byYear)} />
         </div>
     )
 }

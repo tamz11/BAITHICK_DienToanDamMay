@@ -1,7 +1,8 @@
 'use client'
 
 import { usePathname } from "next/navigation"
-import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon, TagsIcon, CircleDollarSignIcon } from "lucide-react"
+import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon, TagsIcon, CircleDollarSignIcon, LogOut } from "lucide-react"
+import { signOut } from 'next-auth/react'
 import Image from "next/image"
 import Link from "next/link"
 import { assets } from "@/assets/assets"
@@ -11,20 +12,20 @@ const AdminSidebar = () => {
     const pathname = usePathname()
 
     const sidebarLinks = [
-        { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-        { name: 'Users', href: '/admin/users', icon: HomeIcon },
-        { name: 'Stores', href: '/admin/stores', icon: StoreIcon },
-        { name: 'Approve Store', href: '/admin/approve', icon: ShieldCheckIcon },
-        { name: 'Categories', href: '/admin/categories', icon: TagsIcon },
-        { name: 'Coupons', href: '/admin/coupons', icon: TicketPercentIcon  },
-        { name: 'Reports', href: '/admin/reports', icon: CircleDollarSignIcon },
+        { name: 'Tổng quan', href: '/admin', icon: HomeIcon },
+        { name: 'Người dùng', href: '/admin/users', icon: HomeIcon },
+        { name: 'Cửa hàng', href: '/admin/stores', icon: StoreIcon },
+        { name: 'Duyệt cửa hàng', href: '/admin/approve', icon: ShieldCheckIcon },
+        { name: 'Danh mục', href: '/admin/categories', icon: TagsIcon },
+        { name: 'Mã giảm giá', href: '/admin/coupons', icon: TicketPercentIcon  },
+        { name: 'Báo cáo', href: '/admin/reports', icon: CircleDollarSignIcon },
     ]
 
     return (
         <div className="inline-flex h-full flex-col gap-5 border-r border-slate-200 sm:min-w-60">
-            <div className="flex flex-col gap-3 justify-center items-center pt-8 max-sm:hidden">
+                <div className="flex flex-col gap-3 justify-center items-center pt-8 max-sm:hidden">
                 <Image className="w-14 h-14 rounded-full" src={assets.gs_logo} alt="" width={80} height={80} />
-                <p className="text-slate-700">Hi, GreatStack</p>
+                <p className="text-slate-700">Xin chào, GreatStack</p>
             </div>
 
             <div className="max-sm:mt-6">
@@ -37,6 +38,16 @@ const AdminSidebar = () => {
                         </Link>
                     ))
                 }
+            </div>
+
+            <div className="mt-auto p-4">
+                <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="flex items-center gap-2 text-slate-700 hover:bg-slate-100 p-2 rounded-md"
+                >
+                    <LogOut size={16} />
+                    <span className="max-sm:hidden">Đăng xuất</span>
+                </button>
             </div>
         </div>
     )

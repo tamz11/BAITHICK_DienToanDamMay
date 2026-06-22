@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { Package, ShoppingCart, Users, CheckCircle, Clock, BarChart3, ArrowRight, User, Phone, MapPin, ListOrdered } from 'lucide-react'
+import { Package, ShoppingCart, Users, CheckCircle, Clock, BarChart3, ArrowRight, User, Phone, MapPin, ListOrdered, Mail } from 'lucide-react'
 import toast from 'react-hot-toast'
 import Link from 'next/link'
 
@@ -56,7 +56,7 @@ export default function StaffDashboard() {
         <div className="space-y-8 animate-fadeIn pb-10">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-800">Tổng quan công việc (Staff)</h1>
+                    <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Tổng quan công việc (Staff)</h1>
                     <p className="text-slate-500 text-sm">Dữ liệu vận hành hệ thống được cập nhật theo thời gian thực.</p>
                 </div>
                 <div className="bg-white px-4 py-2 rounded-lg border border-slate-200 shadow-sm flex items-center gap-2">
@@ -82,7 +82,7 @@ export default function StaffDashboard() {
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
 
-                {/* 📋 ĐƠN HÀNG MỚI CẦN XỬ LÝ - CHI TIẾT NHƯ BẠN MUỐN */}
+                {/* 📋 ĐƠN HÀNG MỚI CẦN XỬ LÝ - CHI TIẾT ĐẦY ĐỦ */}
                 <div className="xl:col-span-2 space-y-6">
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                         <div className="flex items-center justify-between mb-6">
@@ -102,7 +102,7 @@ export default function StaffDashboard() {
                                 data.pendingOrders.map((order) => (
                                     <div key={order.id} className="p-5 bg-slate-50/50 border border-slate-100 rounded-3xl hover:bg-white hover:shadow-xl hover:shadow-slate-100 transition-all duration-300">
                                         <div className="flex flex-col md:flex-row justify-between gap-4">
-                                            {/* Info Khách hàng & Địa chỉ */}
+                                            {/* Thông tin Khách hàng & Địa chỉ */}
                                             <div className="space-y-3 flex-1">
                                                 <div className="flex items-center gap-2">
                                                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">#{order.id.slice(-6).toUpperCase()}</span>
@@ -114,7 +114,9 @@ export default function StaffDashboard() {
                                                         <User size={14} className="text-slate-400 mt-0.5" />
                                                         <div>
                                                             <p className="text-xs font-bold text-slate-700">{order.user?.name}</p>
-                                                            <p className="text-[10px] text-slate-400">{order.user?.email}</p>
+                                                            <div className="flex items-center gap-1 text-[10px] text-slate-400">
+                                                                <Mail size={10} /> {order.user?.email}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-start gap-2">
@@ -131,7 +133,7 @@ export default function StaffDashboard() {
                                                 </div>
                                             </div>
 
-                                            {/* Sản phẩm & Số lượng */}
+                                            {/* Sản phẩm đặt mua */}
                                             <div className="bg-white p-3 rounded-2xl border border-slate-100 min-w-[240px]">
                                                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-1">
                                                     <ListOrdered size={12} /> Sản phẩm đặt mua
@@ -167,7 +169,7 @@ export default function StaffDashboard() {
                     </div>
                 </div>
 
-                {/* 📦 BÊN PHẢI: SẢN PHẨM CHỜ DUYỆT */}
+                {/* 📦 BÊN PHẢI: DANH SÁCH SẢN PHẨM CHỜ DUYỆT */}
                 <div className="space-y-8">
                     <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                         <div className="flex items-center justify-between mb-6">

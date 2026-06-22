@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { clearCart } from '@/lib/features/cart/cartSlice';
-import { setAddressList } from '@/lib/features/address/addressSlice';
+import { setAddressList, setDefaultAddress } from '@/lib/features/address/addressSlice';
 
 const OrderSummary = ({ totalPrice, items }) => {
 
@@ -17,6 +17,8 @@ const OrderSummary = ({ totalPrice, items }) => {
     const { data: session } = useSession();
 
     const addressList = useSelector(state => state.address.list) || [];
+    const addressDefaultId = useSelector(state => state.address.defaultId);
+
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [showAddressModal, setShowAddressModal] = useState(false);
@@ -37,9 +39,6 @@ const OrderSummary = ({ totalPrice, items }) => {
                     const addrData = await addrRes.json();
                     if (addrRes.ok) {
                         dispatch(setAddressList(addrData.data));
-                        if (addrData.data.length > 0 && !selectedAddress) {
-                            setSelectedAddress(addrData.data[0]);
-                        }
                     }
 
                     // 2. Tải danh sách coupon công khai
@@ -56,22 +55,32 @@ const OrderSummary = ({ totalPrice, items }) => {
         fetchData();
     }, [session, dispatch]);
 
-    // Tự động chọn địa chỉ mới nhất nếu có
+    // Tự động chọn địa chỉ (Ưu tiên mặc định, sau đó là địa chỉ đầu tiên)
     useEffect(() => {
         if (addressList.length > 0 && !selectedAddress) {
-            setSelectedAddress(addressList[0]);
+            const def = addressDefaultId ? addressList.find(a => String(a.id) === String(addressDefaultId)) : null;
+            setSelectedAddress(def || addressList[0]);
         }
-    }, [addressList]);
+    }, [addressList, addressDefaultId, selectedAddress]);
 
     const handleSelectAddress = (event) => {
         const addrId = event.target.value;
         const address = addressList.find((item) => String(item.id) === String(addrId));
         setSelectedAddress(address || null);
+
+        if (address) {
+            dispatch(setDefaultAddress(address.id));
+            // Lưu trạng thái địa chỉ mặc định lên server (optional)
+            fetch('/api/address/default', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ addressId: address.id })
+            }).catch(console.warn);
+        }
     };
 
-    // Hàm áp dụng mã giảm giá (dùng chung cho cả nhập tay và nhấn chọn)
     const applyCoupon = async (code) => {
-        if (!code.trim()) return;
+        if (!code || !code.trim()) return;
         setLoadingCoupon(true);
         try {
             const response = await fetch('/api/coupons/validate', {
@@ -211,7 +220,6 @@ const OrderSummary = ({ totalPrice, items }) => {
                             </button>
                         </form>
 
-                        {/* Danh sách mã có sẵn để chọn nhanh */}
                         {availableCoupons.length > 0 && (
                             <div className="flex flex-wrap gap-2 pt-1">
                                 {availableCoupons.map((c) => (
@@ -258,7 +266,7 @@ const OrderSummary = ({ totalPrice, items }) => {
                 disabled={loadingOrder}
                 className='w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 active:scale-95 transition-all disabled:bg-indigo-300 shadow-lg shadow-indigo-100 text-sm'
             >
-                {loadingOrder ? 'Đang xử lý đơn hàng...' : 'Xác nhận Đặt hàng'}
+                {loadingOrder ? 'Đang xử lý...' : 'Xác nhận Đặt hàng'}
             </button>
 
             {showAddressModal && <AddressModal setShowAddressModal={setShowAddressModal} />}

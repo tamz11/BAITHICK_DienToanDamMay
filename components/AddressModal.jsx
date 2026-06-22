@@ -111,4 +111,4 @@ const AddressModal = ({ setShowAddressModal }) => {
     )
 }
 
-export default AddressModal
+export default AddressModal;
