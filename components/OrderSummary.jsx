@@ -184,21 +184,12 @@ const OrderSummary = ({ totalPrice, items }) => {
                         <div>
                             {
                                 addressList.length > 0 && (
-<<<<<<< HEAD
-                                    <select className='border border-slate-300 p-2 w-full my-2 outline-none rounded bg-white text-slate-700 text-xs cursor-pointer' onChange={(e) => {
-                                        if(e.target.value !== "") setSelectedAddress(addressList[e.target.value])
-                                    }} >
-                                        <option value="">-- Chọn địa chỉ có sẵn --</option>
-                                        {
-                                            addressList.map((address, index) => (
-                                                <option key={index} value={index}>{address.name}, {address.city}, {address.state}</option>
-=======
                                     <select className='border border-slate-400 p-2 w-full my-3 outline-none rounded' value={selectedAddress?.id || ''} onChange={handleSelectAddress} >
                                         <option value="">Chọn địa chỉ</option>
                                         {
                                             addressList.map((address) => (
                                                 <option key={address.id} value={address.id}>{address.name}, {address.city}, {address.state}, {address.zip}</option>
->>>>>>> 9c80eba (cập nhật các chức năng buyẻ)
+
                                             ))
                                         }
                                     </select>
