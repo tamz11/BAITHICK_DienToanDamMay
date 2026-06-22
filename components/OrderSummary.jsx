@@ -1,6 +1,6 @@
 'use client'
 import { PlusIcon, SquarePenIcon, XIcon } from 'lucide-react';
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import AddressModal from './AddressModal';
 import { useSelector, useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -17,6 +17,7 @@ const OrderSummary = ({ totalPrice, items }) => {
     const { data: session } = useSession();
 
     const addressList = useSelector(state => state.address.list) || [];
+    const addressDefaultId = useSelector(state => state.address.defaultId)
 
     const [paymentMethod, setPaymentMethod] = useState('COD');
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -30,44 +31,77 @@ const OrderSummary = ({ totalPrice, items }) => {
     const handleSelectAddress = (event) => {
         const address = addressList.find((item) => String(item.id) === String(event.target.value));
         setSelectedAddress(address || null);
-    };
-    const handleCouponCode = async (event) => {
-        event.preventDefault();
-        
-        if (!couponCodeInput.trim()) {
-            toast.error('Vui lòng nhập mã giảm giá');
-            return;
+        if (address) {
+            dispatch({ type: 'address/setDefaultAddress', payload: address.id })
+            try {
+                fetch('/api/addresses/default', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ addressId: address.id }) })
+            } catch (e) {
+                console.warn('Failed to persist default address', e)
+            }
         }
+    };
 
-        setLoadingCoupon(true);
+    // If there is at least one address and none selected, auto-select the first one
+    React.useEffect(() => {
+        if (!selectedAddress && addressList && addressList.length > 0) {
+            const def = addressDefaultId ? addressList.find(a => String(a.id) === String(addressDefaultId)) : null
+            setSelectedAddress(def || addressList[0]);
+        }
+    }, [addressList, addressDefaultId]);
+    const validateCoupon = async (code) => {
+        if (!code || !code.trim()) return null
+        setLoadingCoupon(true)
         try {
             const response = await fetch('/api/coupons/validate', {
                 method: 'POST',
                 credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    code: couponCodeInput.replace(/\s+/g, '').toUpperCase(),
-                }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Lỗi kiểm tra mã giảm giá');
-            }
-
-            setCoupon(data.data);
-            setCouponCodeInput('');
-            toast.success(`Áp dụng mã "${data.data.code}" thành công!`);
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code.replace(/\s+/g, '').toUpperCase() }),
+            })
+            const data = await response.json()
+            if (!response.ok) throw new Error(data.error || 'Lỗi kiểm tra mã giảm giá')
+            return data.data
         } catch (err) {
-            console.error('Coupon validation error:', err);
-            toast.error(err.message || 'Lỗi kiểm tra mã giảm giá');
+            throw err
         } finally {
-            setLoadingCoupon(false);
+            setLoadingCoupon(false)
         }
     }
+
+    const handleCouponCode = async (event) => {
+        event.preventDefault()
+        try {
+            const data = await validateCoupon(couponCodeInput)
+            if (data) {
+                setCoupon(data)
+                setCouponCodeInput('')
+                toast.success(`Áp dụng mã "${data.code}" thành công!`)
+            }
+        } catch (err) {
+            console.error('Coupon validation error:', err)
+            toast.error(err.message || 'Lỗi kiểm tra mã giảm giá')
+        }
+    }
+
+    // Auto-apply coupon from localStorage (set by profile page 'Áp dụng' button)
+    useEffect(() => {
+        const code = typeof window !== 'undefined' ? localStorage.getItem('appliedCoupon') : null
+        if (code) {
+            (async () => {
+                try {
+                    const data = await validateCoupon(code)
+                    if (data) {
+                        setCoupon(data)
+                        toast.success(`Áp dụng mã "${data.code}" từ trang Khuyến mãi`) 
+                    }
+                } catch (err) {
+                    toast.error(err.message || 'Mã không hợp lệ')
+                } finally {
+                    localStorage.removeItem('appliedCoupon')
+                }
+            })()
+        }
+    }, [])
 
     // XỬ LÝ ĐẶT HÀNG (ĐÃ CỨU VÀNG CẤU TRÚC CODE)
     const handlePlaceOrder = async (e) => {

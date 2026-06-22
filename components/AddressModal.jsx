@@ -2,8 +2,10 @@
 import { XIcon } from "lucide-react"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
+import { useDispatch } from 'react-redux'
 
 const AddressModal = ({ setShowAddressModal }) => {
+    const dispatch = useDispatch()
 
     const [address, setAddress] = useState({
         name: '',
@@ -25,8 +27,22 @@ const AddressModal = ({ setShowAddressModal }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-
-        setShowAddressModal(false)
+        try {
+            const res = await fetch('/api/addresses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(address),
+            })
+            const data = await res.json()
+            if (!res.ok) throw new Error(data.error || 'Lỗi lưu địa chỉ')
+            setShowAddressModal(false)
+            toast.success('Đã lưu địa chỉ')
+            // dispatch to redux so OrderSummary can pick it up without reload
+            if (data.address) dispatch({ type: 'address/addAddress', payload: data.address })
+        } catch (err) {
+            console.error('Save address error:', err)
+            toast.error(err.message || 'Lỗi lưu địa chỉ')
+        }
     }
 
     return (

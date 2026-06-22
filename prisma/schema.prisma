@@ -15,6 +15,10 @@ model User {
   email       String    @unique
   password    String
   image       String    @default("")
+  phone       String    @default("")
+  ewallet     String    @default("")
+  defaultAddressId String? @unique
+  defaultAddress   Address?  @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id])
   role        Role      @default(CUSTOMER)
   cart        Json
   isActive    Boolean   @default(true)
@@ -116,6 +120,7 @@ model Address {
   phone     String
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  defaultForUser User?   @relation("UserDefaultAddress")
   Order     Order[]
 
   @@index([userId], map: "Address_userId_fkey")
