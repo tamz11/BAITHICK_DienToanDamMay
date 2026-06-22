@@ -75,7 +75,10 @@ export default function AdminUsers() {
                 <td className="py-3 px-4 text-slate-800">{u.role}</td>
                 <td className="py-3 px-4 text-slate-800">
                   <div className="flex items-center gap-3">
-                    <button className="px-2 py-1 text-xs border rounded" onClick={() => toggleActive(u)}>{u.isActive ? 'Chặn' : 'Mở'}</button>
+                    <button className="px-2 py-1 text-xs border rounded" onClick={() => {
+                      const action = u.isActive ? 'chặn' : 'mở'
+                      if (confirm(`Bạn có chắc muốn ${action} người dùng "${u.email}"?`)) toggleActive(u)
+                    }}>{u.isActive ? 'Chặn' : 'Mở'}</button>
                     <button className="px-2 py-1 text-xs border rounded text-red-600" onClick={() => deleteUser(u)}>Xóa</button>
                   </div>
                 </td>

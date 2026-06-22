@@ -1,7 +1,8 @@
 'use client'
 
 import { usePathname } from "next/navigation"
-import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon, TagsIcon, CircleDollarSignIcon } from "lucide-react"
+import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon, TagsIcon, CircleDollarSignIcon, LogOut } from "lucide-react"
+import { signOut } from 'next-auth/react'
 import Image from "next/image"
 import Link from "next/link"
 import { assets } from "@/assets/assets"
@@ -37,6 +38,16 @@ const AdminSidebar = () => {
                         </Link>
                     ))
                 }
+            </div>
+
+            <div className="mt-auto p-4">
+                <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="flex items-center gap-2 text-slate-700 hover:bg-slate-100 p-2 rounded-md"
+                >
+                    <LogOut size={16} />
+                    <span className="max-sm:hidden">Đăng xuất</span>
+                </button>
             </div>
         </div>
     )

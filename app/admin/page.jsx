@@ -18,7 +18,11 @@ export default function AdminDashboard() {
         pendingStores: 0,
         users: 0,
         allOrders: [],
+        byMonth: [],
+        byYear: []
     })
+
+    const [granularity, setGranularity] = useState('day')
 
     const dashboardCardsData = [
         { title: 'Tổng sản phẩm', value: dashboardData.products, icon: ShoppingBasketIcon },
@@ -82,7 +86,15 @@ export default function AdminDashboard() {
             </div>
 
             {/* Area Chart */}
-            <OrdersAreaChart allOrders={dashboardData.allOrders} />
+            <div className="flex items-center gap-3 mb-3">
+                <label className="text-sm text-slate-600">Xem theo:</label>
+                <select value={granularity} onChange={(e)=>setGranularity(e.target.value)} className="border px-2 py-1 rounded text-sm">
+                    <option value="day">Ngày</option>
+                    <option value="month">Tháng</option>
+                    <option value="year">Năm</option>
+                </select>
+            </div>
+            <OrdersAreaChart granularity={granularity} allOrders={granularity === 'day' ? dashboardData.allOrders : (granularity === 'month' ? dashboardData.byMonth : dashboardData.byYear)} />
         </div>
     )
 }

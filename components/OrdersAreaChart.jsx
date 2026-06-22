@@ -1,7 +1,7 @@
 'use client'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-export default function OrdersAreaChart({ allOrders }) {
+export default function OrdersAreaChart({ allOrders, granularity = 'day' }) {
 
     // allOrders can be either:
     // - an array of { createdAt } order objects, or
@@ -27,14 +27,15 @@ export default function OrdersAreaChart({ allOrders }) {
         }
     }
 
+    const titleMap = { day: 'Ngày', month: 'Tháng', year: 'Năm' }
     return (
         <div className="w-full max-w-4xl h-[300px] text-xs">
-            <h3 className="text-lg font-medium text-slate-800 mb-4 pt-2 text-right"> <span className='text-slate-500'>Orders /</span> Day</h3>
+            <h3 className="text-lg font-medium text-slate-800 mb-4 pt-2 text-right"> <span className='text-slate-500'>Đơn /</span> {titleMap[granularity] || 'Ngày'}</h3>
             <ResponsiveContainer width="100%" height="100%"> 
                 <AreaChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
-                    <YAxis allowDecimals={false} label={{ value: 'Orders', angle: -90, position: 'insideLeft' }} />
+                    <YAxis allowDecimals={false} label={{ value: 'Số đơn', angle: -90, position: 'insideLeft' }} />
                     <Tooltip />
                     <Area type="monotone" dataKey="orders" stroke="#4f46e5" fill="#8884d8" strokeWidth={2} />
                 </AreaChart>
