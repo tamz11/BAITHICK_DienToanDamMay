@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
 import prisma from '@/lib/prisma';
-import { createZohoTask } from "@/lib/zoho";
+
+// 🌟 ĐIỀU CHỈNH: Giữ nguyên import cũ và bổ sung thêm hàm createZohoItem của Hải
+import { createZohoTask, createZohoItem } from "@/lib/zoho";
 
 import { spacesClient } from "@/lib/spacesClient";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -107,9 +109,9 @@ export async function POST(req) {
             }
         });
 
-        // 🌟 TÍCH HỢP ZOHO PROJECTS: Tạo Task kèm đầy đủ thông tin: Tên, Người bán, Link, Mô tả, Giá, Ảnh
         const productUrl = `${process.env.NEXTAUTH_URL}/products/${newProduct.id}`;
 
+        // 🌟 TÍCH HỢP ZOHO PROJECTS: (Giữ nguyên vẹn code của đồng đội cũ)
         createZohoTask(
             newProduct.name,
             store.name,
@@ -118,6 +120,21 @@ export async function POST(req) {
             newProduct.price,
             newProduct.images
         ).catch(console.error);
+
+        // 🌟 TÍCH HỢP ZOHO BOOKS: (Phần Hải viết thêm để đẩy thẳng lên kho kế toán)
+        createZohoItem(
+            newProduct.name,
+            newProduct.price,
+            newProduct.description
+        ).then(zohoResult => {
+            if (zohoResult && zohoResult.code === 0) {
+                console.log(`✓ [Zoho Books] Đồng bộ thành công mặt hàng: ${newProduct.name}`);
+            } else {
+                console.error("⚠️ [Zoho Books] Từ chối tạo Item:", zohoResult);
+            }
+        }).catch(err => {
+            console.error("❌ [Zoho Books] Luồng lỗi kết nối API:", err);
+        });
 
         return NextResponse.json(newProduct, { status: 201 });
 
