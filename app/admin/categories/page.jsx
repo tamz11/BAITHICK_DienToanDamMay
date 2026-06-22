@@ -28,11 +28,11 @@ export default function AdminCategories() {
 
   return (
     <div className="text-slate-500 mb-28">
-      <h1 className="text-2xl">Manage <span className="text-slate-800 font-medium">Categories</span></h1>
+      <h1 className="text-2xl">Quản lý <span className="text-slate-800 font-medium">Danh mục</span></h1>
 
       <form onSubmit={handleAdd} className="max-w-sm mt-4">
-        <input className="w-full p-2 border border-slate-200 rounded" placeholder="Category name" value={name} onChange={(e)=>setName(e.target.value)} />
-        <button className="mt-2 px-4 py-2 bg-slate-700 text-white rounded">Add</button>
+        <input className="w-full p-2 border border-slate-200 rounded" placeholder="Tên danh mục" value={name} onChange={(e)=>setName(e.target.value)} />
+        <button className="mt-2 px-4 py-2 bg-slate-700 text-white rounded">Thêm</button>
       </form>
 
       <div className="mt-6">

@@ -37,16 +37,16 @@ export default function AdminUsers() {
 
   return (
     <div className="text-slate-500 mb-32">
-      <h1 className="text-2xl">Manage <span className="text-slate-800 font-medium">Users</span></h1>
+      <h1 className="text-2xl">Quản lý <span className="text-slate-800 font-medium">Người dùng</span></h1>
 
       <div className="mt-6 overflow-x-auto rounded-lg border border-slate-200 max-w-4xl">
         <table className="min-w-full bg-white text-sm">
           <thead className="bg-slate-50">
             <tr>
-              <th className="py-3 px-4 text-left font-semibold text-slate-600">Name</th>
+              <th className="py-3 px-4 text-left font-semibold text-slate-600">Tên</th>
               <th className="py-3 px-4 text-left font-semibold text-slate-600">Email</th>
-              <th className="py-3 px-4 text-left font-semibold text-slate-600">Role</th>
-              <th className="py-3 px-4 text-left font-semibold text-slate-600">Active</th>
+              <th className="py-3 px-4 text-left font-semibold text-slate-600">Vai trò</th>
+              <th className="py-3 px-4 text-left font-semibold text-slate-600">Hoạt động</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200">
