@@ -5,10 +5,12 @@ import Loading from '@/components/Loading'
 export default function AdminUsers() {
   const [loading, setLoading] = useState(true)
   const [users, setUsers] = useState([])
+  const [query, setQuery] = useState('')
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (q) => {
     setLoading(true)
-    const res = await fetch('/api/admin/users', { credentials: 'include' })
+    const url = q ? `/api/admin/users?q=${encodeURIComponent(q)}` : '/api/admin/users'
+    const res = await fetch(url, { credentials: 'include' })
     const data = await res.json()
     if (!res.ok) {
       console.error('Failed to fetch users', data)
@@ -31,6 +33,14 @@ export default function AdminUsers() {
     fetchUsers()
   }
 
+  const deleteUser = async (user) => {
+    if (!confirm(`Xóa người dùng ${user.email}? Hành động này không thể hoàn tác.`)) return
+    const res = await fetch('/api/admin/users', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ userId: user.id }) })
+    const data = await res.json()
+    if (!res.ok) return alert(data?.error || 'Lỗi khi xóa')
+    fetchUsers()
+  }
+
   useEffect(() => { fetchUsers() }, [])
 
   if (loading) return <Loading />
@@ -38,6 +48,14 @@ export default function AdminUsers() {
   return (
     <div className="text-slate-500 mb-32">
       <h1 className="text-2xl">Quản lý <span className="text-slate-800 font-medium">Người dùng</span></h1>
+
+      <div className="mt-4 max-w-sm">
+        <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Tìm theo tên hoặc email" className="w-full p-2 border rounded" />
+        <div className="mt-2 flex gap-2">
+          <button className="px-3 py-1 bg-slate-700 text-white rounded" onClick={()=>fetchUsers(query)}>Tìm</button>
+          <button className="px-3 py-1 border rounded" onClick={()=>{setQuery(''); fetchUsers('')}}>Reset</button>
+        </div>
+      </div>
 
       <div className="mt-6 overflow-x-auto rounded-lg border border-slate-200 max-w-4xl">
         <table className="min-w-full bg-white text-sm">
@@ -56,7 +74,10 @@ export default function AdminUsers() {
                 <td className="py-3 px-4 text-slate-800">{u.email}</td>
                 <td className="py-3 px-4 text-slate-800">{u.role}</td>
                 <td className="py-3 px-4 text-slate-800">
-                  <input type="checkbox" checked={u.isActive} onChange={() => toggleActive(u)} />
+                  <div className="flex items-center gap-3">
+                    <button className="px-2 py-1 text-xs border rounded" onClick={() => toggleActive(u)}>{u.isActive ? 'Chặn' : 'Mở'}</button>
+                    <button className="px-2 py-1 text-xs border rounded text-red-600" onClick={() => deleteUser(u)}>Xóa</button>
+                  </div>
                 </td>
               </tr>
             ))}
