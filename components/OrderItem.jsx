@@ -41,7 +41,6 @@ const OrderItem = ({ order, onConfirm }) => {
             const data = await res.json();
             if (res.ok) {
                 toast.success("Xác nhận đã nhận hàng thành công!");
-                // Reload lại trang hoặc gọi callback để cập nhật giao diện
                 window.location.reload();
             } else {
                 toast.error(data.error || "Có lỗi xảy ra");
@@ -54,6 +53,7 @@ const OrderItem = ({ order, onConfirm }) => {
     };
 
     const getStatusStyles = (status) => {
+        if (!status) return 'border-slate-200 bg-slate-50 text-slate-700';
         const s = status.toLowerCase();
         if (s === 'delivered') return 'border-green-200 bg-green-50 text-green-700';
         if (s === 'shipped') return 'border-blue-200 bg-blue-50 text-blue-700';
@@ -67,54 +67,63 @@ const OrderItem = ({ order, onConfirm }) => {
             <tr className="text-sm">
                 <td className="text-left">
                     <div className="flex flex-col gap-6">
-                        {order.orderItems.map((item, index) => (
-                            <div key={index} className="flex items-center gap-4">
-                                <div className="w-20 aspect-square bg-slate-50 flex items-center justify-center rounded-md overflow-hidden border border-slate-100">
-                                    <Image
-                                        className="h-14 w-auto object-contain"
-                                        src={getProductImage(item.product.images)}
-                                        alt={item.product.name}
-                                        width={50}
-                                        height={50}
-                                    />
-                                </div>
-                                <div className="flex flex-col justify-center text-sm">
-                                    <p className="font-bold text-slate-700 text-base">{item.product.name}</p>
-                                    <p className="text-slate-500">{currency}{item.price} x {item.quantity} </p>
-                                    <p className="text-[11px] text-slate-400">{new Date(order.createdAt).toLocaleDateString()}</p>
-                                    <div className="mt-2">
-                                        {ratings.find(rating => order.id === rating.orderId && item.product.id === rating.productId)
-                                            ? <Rating value={ratings.find(rating => order.id === rating.orderId && item.product.id === rating.productId).rating} />
-                                            : (order.status && String(order.status).toLowerCase().includes('deliver')) && (
+                        {order.orderItems?.map((item, index) => {
+                            // 🌟 TỐI ƯU HÓA: Tìm kiếm rating 1 lần duy nhất bằng Optional Chaining an toàn
+                            const existRating = ratings?.find(
+                                rating => order.id === rating?.orderId && item.product?.id === rating?.productId
+                            );
+
+                            return (
+                                <div key={index} className="flex items-center gap-4">
+                                    <div className="w-20 aspect-square bg-slate-50 flex items-center justify-center rounded-md overflow-hidden border border-slate-100">
+                                        <Image
+                                            className="h-14 w-auto object-contain"
+                                            src={getProductImage(item.product?.images)}
+                                            alt={item.product?.name || "Product"}
+                                            width={50}
+                                            height={50}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col justify-center text-sm">
+                                        <p className="font-bold text-slate-700 text-base">{item.product?.name}</p>
+                                        <p className="text-slate-500">{currency}{item.price} x {item.quantity} </p>
+                                        <p className="text-[11px] text-slate-400">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                        
+                                        <div className="mt-2">
+                                            {existRating ? (
+                                                <Rating value={existRating.value} />
+                                            ) : (
+                                                order.status && String(order.status).toLowerCase().includes('deliver')
+                                            ) && (
                                                 <button
-                                                    onClick={() => setRatingModal({ orderId: order.id, productId: item.product.id })}
+                                                    onClick={() => setRatingModal({ orderId: order.id, productId: item.product?.id })}
                                                     className="text-xs font-bold text-emerald-600 hover:underline"
                                                 >
                                                     Đánh giá sản phẩm
                                                 </button>
-                                            )
-                                        }
+                                            )}
+                                        </div>
+                                        {ratingModal && <RatingModal ratingModal={ratingModal} setRatingModal={setRatingModal} />}
                                     </div>
-                                    {ratingModal && <RatingModal ratingModal={ratingModal} setRatingModal={setRatingModal} />}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </td>
 
-                <td className="text-center max-md:hidden font-bold text-slate-800">{currency}{order.total.toLocaleString()}</td>
+                <td className="text-center max-md:hidden font-bold text-slate-800">{currency}{order.total?.toLocaleString()}</td>
 
                 <td className="text-left max-md:hidden text-xs text-slate-500 leading-relaxed">
-                    <p className="font-bold text-slate-700">{order.address.name}</p>
-                    <p>{order.address.street}, {order.address.city}</p>
-                    <p>{order.address.state} - {order.address.zip}</p>
-                    <p>SĐT: {order.address.phone}</p>
+                    <p className="font-bold text-slate-700">{order.address?.name}</p>
+                    <p>{order.address?.street}, {order.address?.city}</p>
+                    <p>{order.address?.state} - {order.address?.zip}</p>
+                    <p>SĐT: {order.address?.phone}</p>
                 </td>
 
                 <td className="text-left space-y-3 text-sm max-md:hidden min-w-[180px]">
                     <div className={`flex items-center gap-2 rounded-full border px-3 py-1.5 w-fit font-bold text-[10px] uppercase tracking-wider ${getStatusStyles(order.status)}`}>
                         <DotIcon size={14} />
-                        {order.status.replace(/_/g, ' ')}
+                        {order.status?.replace(/_/g, ' ')}
                     </div>
 
                     {/* NÚT XÁC NHẬN NHẬN HÀNG */}

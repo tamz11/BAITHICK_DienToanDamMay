@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -8,9 +8,11 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import PageTitle from "@/components/PageTitle";
 import OrderItem from "@/components/OrderItem";
-import { TicketPercent, Info, CheckCircle2 } from "lucide-react";
+import { TicketPercent } from "lucide-react";
 import AddressModal from '@/components/AddressModal'
 import { couponDummyData } from "@/assets/assets";
+// 🌟 1. ĐÃ THÊM: Import setRatings từ Redux Slice quản lý ratings
+import { setRatings } from "@/lib/features/rating/ratingSlice";
 
 export default function ProfilePage() {
     const { data: session, status } = useSession();
@@ -26,6 +28,7 @@ export default function ProfilePage() {
     const [orders, setOrders] = useState([]);
     const [coupons, setCoupons] = useState([]);
     const { ratings } = useSelector((state) => state.rating || { ratings: [] });
+    console.log("DỮ LIỆU RATINGS THỰC TẾ NÈ ", ratings);
     const addressDefaultId = useSelector((state) => state.address?.defaultId)
     const [activeTab, setActiveTab] = useState('info');
     const fileInputRef = useRef(null);
@@ -86,31 +89,41 @@ export default function ProfilePage() {
         }
 
         if (status === 'authenticated') fetchAddresses()
-    }, [status, showAddressModal])
+    }, [status, showAddressModal, dispatch])
 
     const Addresses = useCallback(() => {
         if (!addresses || addresses.length === 0) return <p className="text-sm text-slate-400">Chưa có địa chỉ nào.</p>
         return (
             <div className="flex flex-col gap-2">
-                {addresses.map((a, idx) => (
-                    <div key={a.id} className="p-2 border rounded text-sm text-slate-700 flex justify-between items-center">
+                {addresses.map((a) => (
+                    <div key={a.id} className="p-3 border border-slate-200 rounded-2xl text-sm text-slate-700 flex justify-between items-center bg-slate-50">
                         <div>
-                            <div className="font-medium">{a.name} {a.phone ? `· ${a.phone}` : ''}</div>
-                            <div className="text-xs text-slate-500">{a.street}, {a.city}, {a.state} {a.zip}</div>
+                            <div className="font-semibold text-slate-800">{a.name} {a.phone ? `· ${a.phone}` : ''}</div>
+                            <div className="text-xs text-slate-500 mt-0.5">{a.street}, {a.city}, {a.state} {a.zip}</div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                            <button onClick={async () => {
-                                try {
-                                    const res = await fetch('/api/addresses/default', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ addressId: a.id }) })
-                                    if (!res.ok) throw new Error('Không thể đặt mặc định')
-                                    dispatch({ type: 'address/setDefaultAddress', payload: a.id })
-                                    toast.success('Cập nhật địa chỉ mặc định')
-                                } catch (err) {
-                                    console.error('Set default error:', err)
-                                    toast.error(err.message || 'Lỗi')
-                                }
-                            }} className="text-xs rounded px-3 py-1 bg-indigo-600 text-white">Đặt làm mặc định</button>
-                            {String(addressDefaultId) === String(a.id) ? <span className="text-[11px] text-slate-400">Mặc định</span> : null}
+                            <button 
+                                type="button"
+                                onClick={async () => {
+                                    try {
+                                        const res = await fetch('/api/addresses/default', { 
+                                            method: 'POST', 
+                                            headers: { 'Content-Type': 'application/json' }, 
+                                            body: JSON.stringify({ addressId: a.id }) 
+                                        })
+                                        if (!res.ok) throw new Error('Không thể đặt mặc định')
+                                        dispatch({ type: 'address/setDefaultAddress', payload: a.id })
+                                        toast.success('Cập nhật địa chỉ mặc định thành công');
+                                    } catch (err) {
+                                        console.error('Set default error:', err)
+                                        toast.error(err.message || 'Lỗi hệ thống');
+                                    }
+                                }} 
+                                className="text-xs font-medium rounded-xl px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white transition shadow-sm"
+                            >
+                                Đặt làm mặc định
+                            </button>
+                            {String(addressDefaultId) === String(a.id) ? <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Mặc định</span> : null}
                         </div>
                     </div>
                 ))}
@@ -139,6 +152,7 @@ export default function ProfilePage() {
         if (status === 'authenticated') fetchStore()
     }, [status])
 
+    // 🌟 2. ĐÃ SỬA: Thêm logic fetchRatingsData chống Cache vào useEffect lấy đơn hàng
     useEffect(() => {
         const fetchOrdersAndCoupons = async () => {
             try {
@@ -161,10 +175,26 @@ export default function ProfilePage() {
             }
         };
 
+        // Hàm chủ động kéo ratings từ MySQL kèm thông tin product thật
+        const fetchRatingsData = async () => {
+            try {
+                // Ép Next.js không lưu cache tĩnh ở Client bằng tham số no-store
+                const res = await fetch('/api/ratings', { cache: 'no-store' });
+                if (res.ok) {
+                    const data = await res.json();
+                    // Đẩy mảng dữ liệu có chứa 'product' thật từ database lên Redux
+                    dispatch(setRatings(data.ratings || []));
+                }
+            } catch (error) {
+                console.error("Lỗi lấy danh sách đánh giá từ DB:", error);
+            }
+        };
+
         if (status === 'authenticated') {
             fetchOrdersAndCoupons();
+            fetchRatingsData(); // 🔥 Kích hoạt chạy đồng thời khi user đã login
         }
-    }, [status]);
+    }, [status, dispatch]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -195,38 +225,6 @@ export default function ProfilePage() {
         }
     };
 
-    const handleAddAddress = async (e) => {
-        e.preventDefault()
-        try {
-            const res = await fetch('/api/addresses', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: addrName,
-                    street: addrStreet,
-                    city: addrCity,
-                    state: addrStateVal,
-                    zip: addrZip,
-                    country: 'VN',
-                    phone: phone || ''
-                }),
-            })
-            const data = await res.json()
-            if (!res.ok) throw new Error(data.error || 'Lỗi thêm địa chỉ')
-
-            dispatch({ type: 'address/addAddress', payload: data.address })
-            toast.success('Đã thêm địa chỉ')
-            setAddrName('')
-            setAddrStreet('')
-            setAddrCity('')
-            setAddrStateVal('')
-            setAddrZip('')
-        } catch (err) {
-            console.error('Add address error:', err)
-            toast.error(err.message || 'Lỗi thêm địa chỉ')
-        }
-    }
-
     if (status === "loading") {
         return (
             <main className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -234,12 +232,6 @@ export default function ProfilePage() {
             </main>
         );
     }
-
-    const totalOrders = orders.length;
-    const deliveredOrders = orders.filter((order) => order.status && order.status.toLowerCase().includes("deliver")).length;
-    const pendingOrders = orders.filter((order) => !(order.status && order.status.toLowerCase().includes("deliver"))).length;
-    const couponOrders = orders.filter((order) => order.isCouponUsed).length;
-    const activeCoupons = coupons.length;
 
     return (
         <main className="min-h-[calc(100vh-6rem)] bg-slate-50 py-16">
@@ -250,7 +242,7 @@ export default function ProfilePage() {
                             <h1 className="text-2xl font-semibold text-slate-800">Trang cá nhân</h1>
                             <p className="mt-1 text-sm text-slate-500">Quản lý thông tin tài khoản, đơn hàng và đánh giá.</p>
                         </div>
-                        <Link href="/" className="inline-flex items-center rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200">
+                        <Link href="/" className="inline-flex items-center rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200 transition">
                             Về trang chủ
                         </Link>
                     </div>
@@ -264,8 +256,9 @@ export default function ProfilePage() {
                         ].map((tab) => (
                             <button
                                 key={tab.key}
+                                type="button"
                                 onClick={() => setActiveTab(tab.key)}
-                                className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${activeTab === tab.key ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border border-slate-200'}`}>
+                                className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${activeTab === tab.key ? 'bg-indigo-600 text-white shadow-sm' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'}`}>
                                 {tab.label}
                             </button>
                         ))}
@@ -277,14 +270,14 @@ export default function ProfilePage() {
                                 <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6">
                                     <div className="flex flex-col items-center gap-4 mb-4">
                                         <div className="relative">
-                                            <button type="button" onClick={() => fileInputRef.current?.click()} className="group relative">
+                                            <button type="button" onClick={() => fileInputRef.current?.click()} className="group relative block rounded-full overflow-hidden focus:outline-none">
                                                 {image ? (
                                                     <img src={image} alt="avatar" className="w-28 h-28 rounded-full object-cover border border-slate-200 cursor-pointer" />
                                                 ) : (
                                                     <div className="w-28 h-28 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 cursor-pointer">No image</div>
                                                 )}
-                                                <div className="absolute inset-0 flex items-end justify-center opacity-0 group-hover:opacity-100 transition">
-                                                    <span className="mb-2 bg-black/60 text-white text-xs px-2 py-1 rounded-md">Chỉnh sửa</span>
+                                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+                                                    <span className="text-white text-xs px-2 py-1 font-medium">Chỉnh sửa</span>
                                                 </div>
                                             </button>
                                             <input ref={fileInputRef} type="file" accept="image/*" onChange={async (e) => {
@@ -327,7 +320,7 @@ export default function ProfilePage() {
                                                     type="email"
                                                     value={session?.user?.email || ""}
                                                     disabled
-                                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-900 outline-none"
+                                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500 outline-none cursor-not-allowed"
                                                 />
                                             </label>
 
@@ -339,7 +332,7 @@ export default function ProfilePage() {
                                                     onChange={(e) => setName(e.target.value)}
                                                     required
                                                     disabled={loading}
-                                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
+                                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
                                                     placeholder="Nguyễn Văn A"
                                                 />
                                             </label>
@@ -392,7 +385,7 @@ export default function ProfilePage() {
                                                     value={phone}
                                                     onChange={(e) => setPhone(e.target.value)}
                                                     disabled={loading}
-                                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
+                                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
                                                     placeholder="09xxxxxxxx"
                                                 />
                                             </label>
@@ -404,24 +397,24 @@ export default function ProfilePage() {
                                                     value={ewallet}
                                                     onChange={(e) => setEwallet(e.target.value)}
                                                     disabled={loading}
-                                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
+                                                    className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-100"
                                                     placeholder="Số điện thoại ví (ví MoMo/ZaloPay...)"
                                                 />
                                             </label>
                                         </div>
 
-                                        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                                            <p className="mb-2 text-sm font-medium text-slate-700">Địa chỉ của bạn</p>
+                                        <div className="rounded-3xl border border-slate-200 bg-white p-5 space-y-3">
+                                            <p className="text-sm font-medium text-slate-700">Địa chỉ của bạn</p>
                                             <Addresses />
-                                            <div className="mt-3">
-                                                <button onClick={() => setShowAddressModal(true)} className="rounded-2xl bg-green-600 px-4 py-2 text-white text-sm">Thêm địa chỉ mới</button>
+                                            <div className="pt-1">
+                                                <button type="button" onClick={() => setShowAddressModal(true)} className="rounded-xl font-semibold bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 text-xs transition shadow-sm active:scale-95">Thêm địa chỉ mới</button>
                                             </div>
                                         </div>
 
                                         <button
                                             type="submit"
                                             disabled={loading}
-                                            className="w-full rounded-2xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:bg-indigo-400"
+                                            className="w-full rounded-2xl bg-indigo-600 px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-indigo-700 shadow-md active:scale-[0.99] disabled:bg-indigo-400 disabled:scale-100"
                                         >
                                             {loading ? "Đang cập nhật..." : "Lưu thay đổi"}
                                         </button>
@@ -471,16 +464,16 @@ export default function ProfilePage() {
                                 <div className="mt-6 space-y-3">
                                     {activeCoupons > 0 ? (
                                         coupons.map((coupon) => (
-                                                <div key={coupon.code} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 flex justify-between items-start">
-                                                    <div>
-                                                        <p className="font-semibold text-slate-800">{coupon.code}</p>
-                                                        <p className="text-sm text-slate-600">{coupon.description}</p>
-                                                        <p className="mt-2 text-sm text-slate-500">Giảm {coupon.discount}% - Hết hạn {new Date(coupon.expiresAt).toLocaleDateString('vi-VN')}</p>
-                                                    </div>
-                                                    <div>
-                                                        <button onClick={() => { localStorage.setItem('appliedCoupon', coupon.code); router.push('/cart'); }} className="rounded-md bg-indigo-600 text-white px-3 py-2 text-sm">Áp dụng</button>
-                                                    </div>
+                                            <div key={coupon.code} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 flex justify-between items-start shadow-sm">
+                                                <div>
+                                                    <p className="font-semibold text-slate-800 flex items-center gap-1.5"><TicketPercent size={16} className="text-indigo-600" />{coupon.code}</p>
+                                                    <p className="text-sm text-slate-600 mt-1">{coupon.description}</p>
+                                                    <p className="mt-2 text-xs text-slate-400 font-medium">Giảm {coupon.discount}% - Hết hạn {new Date(coupon.expiresAt).toLocaleDateString('vi-VN')}</p>
                                                 </div>
+                                                <div>
+                                                    <button type="button" onClick={() => { localStorage.setItem('appliedCoupon', coupon.code); router.push('/cart'); }} className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs font-semibold shadow-sm transition">Áp dụng</button>
+                                                </div>
+                                            </div>
                                         ))
                                     ) : (
                                         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">Không có mã giảm giá mới.</div>
@@ -495,13 +488,14 @@ export default function ProfilePage() {
                                 <p className="mt-2 text-sm text-slate-500">Xem lại những sản phẩm bạn đã đánh giá.</p>
                                 {ratings && ratings.length > 0 ? (
                                     <div className="mt-6 space-y-4">
-                                        {ratings.map((item) => (
-                                            <div key={`${item.orderId}-${item.productId}`} className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                                                <p className="font-semibold text-slate-800">{item.product?.name || item.productId}</p>
-                                                <p className="text-sm text-slate-500">{item.review || 'Không có nhận xét'}</p>
-                                                <div className="mt-2 flex items-center gap-1 text-green-600">
-                                                    {Array.from({ length: 5 }, (_, index) => (
-                                                        <span key={index} className={item.rating > index ? 'font-bold' : 'text-slate-300'}>★</span>
+                                        {ratings?.map((item, index) => (
+                                            <div key={`${item?.orderId || 'order'}-${item?.productId || 'product'}-${index}`} className="rounded-3xl border border-slate-200 bg-slate-50 p-5 shadow-sm space-y-1">
+                                                <p className="font-semibold text-slate-800 text-base">{item?.product?.name || "Sản phẩm không tồn tại"}</p>
+                                                <p className="text-sm text-slate-600 font-medium italic">"{item?.review || 'Không có nhận xét'}"</p>
+                                                
+                                                <div className="mt-2 flex items-center gap-0.5 text-amber-500 text-lg">
+                                                    {Array.from({ length: 5 }, (_, idx) => (
+                                                        <span key={idx} className={item?.rating > idx ? 'font-bold' : 'text-slate-200'}>★</span>
                                                     ))}
                                                 </div>
                                             </div>

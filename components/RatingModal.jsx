@@ -47,6 +47,9 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
             const data = await response.json();
             dispatch(addRating(data.data));
             toast.success('Đánh giá thành công!');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
             setRatingModal(null);
             setRating(0);
             setReview('');
