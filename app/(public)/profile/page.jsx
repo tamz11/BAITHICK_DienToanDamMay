@@ -8,12 +8,9 @@ import toast from "react-hot-toast";
 import Link from "next/link";
 import PageTitle from "@/components/PageTitle";
 import OrderItem from "@/components/OrderItem";
-<<<<<<< HEAD
 import { TicketPercent, Info, CheckCircle2 } from "lucide-react";
-=======
 import AddressModal from '@/components/AddressModal'
 import { couponDummyData } from "@/assets/assets";
->>>>>>> main
 
 export default function ProfilePage() {
     const { data: session, status } = useSession();
