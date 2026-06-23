@@ -15,7 +15,7 @@ const Footer = () => {
             title: "SảN PHẨM",
             links: [
                 { text: "Tai nghe", path: '/', icon: null },
-                { text: "Tai nghe khỈu nhỡc", path: '/', icon: null },
+                { text: "Máy tính bảng", path: '/', icon: null },
                 { text: "Smartphone", path: '/', icon: null },
                 { text: "Laptop", path: '/', icon: null },
             ]
@@ -32,9 +32,9 @@ const Footer = () => {
         {
             title: "LIÊN HỆ",
             links: [
-                { text: "+1-212-456-7890", path: '/', icon: PhoneIcon },
-                { text: "contact@example.com", path: '/', icon:MailIcon  },
-                { text: "794 Francisco, 94102", path: '/', icon: MapPinIcon }
+                { text: "0987654321", path: '/', icon: PhoneIcon },
+                { text: "65htttg1@techmart.app", path: '/', icon:MailIcon  },
+                { text: "175 Tây Sơn, Kim Liên, Hà Nội", path: '/', icon: MapPinIcon }
             ]
         }
     ];
@@ -54,7 +54,7 @@ const Footer = () => {
                         <Link href="/" className="text-4xl font-semibold text-slate-700">
                             <span className="text-green-600">go</span>cart<span className="text-green-600 text-5xl leading-0">.</span>
                         </Link>
-                        <p className="max-w-[410px] mt-6 text-sm">Đón vị là địa đến cuối cùng của bạn cho các thiết bị mớng nhất và thông minh nhất. Từ smartphone và smartwatch cho đến các phụ kiện thiết yếu, chúng tôi mang đến cho bạn cái tốt nhất trong đổi mới — tất cả ở một nơi.</p>
+                        <p className="max-w-[410px] mt-6 text-sm">Tập hợp những thiết bị thông minh và phụ kiện cần thiết: smartphone, smartwatch và hơn thế nữa — tất cả tiện lợi trong một nơi cho bạn.</p>
                         <div className="flex items-center gap-3 mt-5">
                             {socialIcons.map((item, i) => (
                                 <Link href={item.link} key={i} className="flex items-center justify-center w-10 h-10 bg-slate-100 hover:scale-105 hover:border border-slate-300 transition rounded-full">

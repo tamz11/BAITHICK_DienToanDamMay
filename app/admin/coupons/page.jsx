@@ -18,7 +18,7 @@ export default function AdminCoupons() {
         discount: '',
         forNewUser: false,
         forMember: false,
-        isPublic: false,
+        isPublic: true,
         expiresAt: new Date()
     })
 
@@ -44,7 +44,7 @@ export default function AdminCoupons() {
         const res = await fetch('/api/admin/coupons', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
         const data = await res.json()
         if (res.ok) {
-            setNewCoupon({ code: '', description: '', discount: '', forNewUser: false, forMember: false, isPublic: false, expiresAt: new Date() })
+            setNewCoupon({ code: '', description: '', discount: '', forNewUser: false, forMember: false, isPublic: true, expiresAt: new Date() })
             await fetchCoupons()
         } else {
             throw new Error(data.error || 'Failed')

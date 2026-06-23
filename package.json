@@ -29,6 +29,14 @@
     "react-redux": "^9.2.0",
     "recharts": "^3.1.2"
   },
+  "dependenciesMeta": {
+    "nodemailer": {
+      "optional": true
+    }
+  },
+  "optionalDependencies": {
+    "nodemailer": "^7.0.13"
+  },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "prisma": "^5.22.0",

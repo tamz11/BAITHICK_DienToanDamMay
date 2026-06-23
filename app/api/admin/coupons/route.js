@@ -15,7 +15,7 @@ export async function POST(req) {
   try {
     await requireAdmin(req)
     const body = await req.json()
-    const { code, description, discount, forNewUser = false, forMember = false, isPublic = false, expiresAt } = body
+    const { code, description, discount, forNewUser = false, forMember = false, isPublic = true, expiresAt } = body
     if (!code || !description || !discount || !expiresAt) return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400 })
     const codeUpper = String(code).replace(/\s+/g, '').toUpperCase()
 
