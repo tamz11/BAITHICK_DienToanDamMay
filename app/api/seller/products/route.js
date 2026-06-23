@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"; 
 import prisma from '@/lib/prisma';
 
-// 🌟 ĐIỀU CHỈNH: Giữ nguyên import cũ và bổ sung thêm hàm createZohoItem của Hải
+// 🌟 Import chuẩn cả 2 hàm xử lý từ trợ lý zoho.js
 import { createZohoTask, createZohoItem } from "@/lib/zoho";
 
 import { spacesClient } from "@/lib/spacesClient";
@@ -11,6 +11,9 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const dynamic = 'force-dynamic';
 
+// ==========================================
+// 🌌 HÀM UTILS: UPLOAD ẢNH LÊN DIGITALOCEAN SPACES
+// ==========================================
 async function uploadBase64ToSpaces(base64Str) {
     if (!base64Str || !base64Str.startsWith("data:image")) return base64Str;
     try {
@@ -36,6 +39,9 @@ async function uploadBase64ToSpaces(base64Str) {
     }
 }
 
+// ==========================================
+// 📥 1. API LẤY DANH SÁCH SẢN PHẨM (GET)
+// ==========================================
 export async function GET() {
     try {
         const session = await getServerSession(authOptions);
@@ -71,19 +77,34 @@ export async function GET() {
     }
 }
 
+// ==========================================
+// 🚀 2. API ĐĂNG SẢN PHẨM MỚI (POST)
+// ==========================================
 export async function POST(req) {
     try {
+        // 1. Xác thực Session và Quyền hạn
         const session = await getServerSession(authOptions);
         if (!session || session.user.role !== "STORE_OWNER") {
             return NextResponse.json({ error: "Từ chối quyền truy cập" }, { status: 403 });
         }
 
+        // 2. Xác thực sự tồn tại của Cửa hàng
         const store = await prisma.store.findUnique({ where: { userId: session.user.id } });
         if (!store) return NextResponse.json({ error: "Thiếu bản ghi Store" }, { status: 404 });
 
+        // 🛡️ 3. Kiểm tra trạng thái duyệt của Cửa hàng (Chặn lỗi nghiệp vụ)
+        if (store.status !== "APPROVED") {
+            return NextResponse.json(
+                { error: "Cửa hàng của bạn đang chờ Admin phê duyệt. Vui lòng quay lại sau khi được kích hoạt!" }, 
+                { status: 403 }
+            );
+        }
+
+        // 4. Đọc dữ liệu từ Frontend gửi lên
         const body = await req.json();
         const { name, description, mrp, price, category, stock, images } = body;
 
+        // 5. Xử lý upload ảnh Base64 lên DigitalOcean Spaces
         let finalImagesValue = "/placeholder.png";
         if (images) {
             if (Array.isArray(images)) {
@@ -94,6 +115,7 @@ export async function POST(req) {
             }
         }
 
+        // 6. Lưu dữ liệu Sản phẩm vào MySQL local dưới trạng thái PENDING
         const newProduct = await prisma.product.create({
             data: {
                 name,
@@ -111,7 +133,7 @@ export async function POST(req) {
 
         const productUrl = `${process.env.NEXTAUTH_URL}/products/${newProduct.id}`;
 
-        // 🌟 TÍCH HỢP ZOHO PROJECTS: (Giữ nguyên vẹn code của đồng đội cũ)
+        // 🌟 TÍCH HỢP ZOHO PROJECTS: Tạo phiếu kiểm định Task cho nhân viên Staff duyệt
         createZohoTask(
             newProduct.name,
             store.name,
@@ -119,9 +141,9 @@ export async function POST(req) {
             newProduct.description,
             newProduct.price,
             newProduct.images
-        ).catch(console.error);
+        ).catch(err => console.error("Lỗi ngầm luồng Projects:", err));
 
-        // 🌟 TÍCH HỢP ZOHO BOOKS: (Phần Hải viết thêm để đẩy thẳng lên kho kế toán)
+        // 🌟 TÍCH HỢP ZOHO BOOKS: Đẩy trực tiếp mặt hàng lên kho kế toán của Hải
         createZohoItem(
             newProduct.name,
             newProduct.price,
@@ -136,6 +158,7 @@ export async function POST(req) {
             console.error("❌ [Zoho Books] Luồng lỗi kết nối API:", err);
         });
 
+        // 7. Phản hồi thành công về cho Seller
         return NextResponse.json(newProduct, { status: 201 });
 
     } catch (error) {
