@@ -1,42 +1,41 @@
 import { getServerSession } from 'next-auth/next'
 import prisma from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { NextResponse } from 'next/server'
 
 export async function GET(req) {
   try {
     const session = await getServerSession(authOptions)
 
-    // fetch all coupons (we'll filter visibility logic below)
-    let coupons = await prisma.coupon.findMany({
-      orderBy: { createdAt: 'desc' },
-    })
-
-    // if user is authenticated, filter based on forNewUser / forMember rules
+    // Lấy số đơn hàng của khách để biết họ có được dùng mã NewUser/Member không
+    let orderCount = 0;
     if (session?.user?.email) {
-      const user = await prisma.user.findUnique({ where: { email: session.user.email } })
-      if (user) {
-        // count orders to determine new-user / member status
-        const ordersCount = await prisma.order.count({ where: { userId: user.id } })
-        coupons = coupons.filter(c => {
-          // skip expired
-          if (new Date(c.expiresAt) <= new Date()) return false
-          // visible if explicitly public
-          if (c.isPublic) return true
-          // visible if it's a new-user coupon and user has 0 orders
-          if (c.forNewUser && ordersCount === 0) return true
-          // visible if it's a member coupon and user has >=3 orders
-          if (c.forMember && ordersCount >= 3) return true
-          return false
-        })
-      }
-    } else {
-      // not authenticated: keep only public coupons that are not expired and not restricted
-      coupons = coupons.filter(c => c.isPublic && !c.forMember && !c.forNewUser && new Date(c.expiresAt) > new Date())
+        const user = await prisma.user.findUnique({ where: { email: session.user.email } })
+        if (user) {
+            orderCount = await prisma.order.count({
+                where: { userId: user.id }
+            });
+        }
     }
 
-    return new Response(JSON.stringify({ coupons }), { status: 200 })
+    const coupons = await prisma.coupon.findMany({
+      where: {
+        isPublic: true,
+        expiresAt: { gte: new Date() }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // Gắn thêm trạng thái "khả dụng" cho từng mã dựa trên loại khách hàng
+    // Logic: forNewUser chỉ dành cho 0 đơn. forMember dành cho >= 2 đơn (đơn đang đặt là đơn thứ 3)
+    const availableCoupons = coupons.map(c => ({
+        ...c,
+        isEligible: (c.forNewUser ? orderCount === 0 : true) && (c.forMember ? orderCount >= 2 : true)
+    }));
+
+    return NextResponse.json({ success: true, data: availableCoupons });
   } catch (err) {
     console.error('Get coupons error:', err)
-    return new Response(JSON.stringify({ error: 'Lỗi lấy mã giảm giá' }), { status: 500 })
+    return NextResponse.json({ error: 'Lỗi hệ thống' }, { status: 500 });
   }
 }
