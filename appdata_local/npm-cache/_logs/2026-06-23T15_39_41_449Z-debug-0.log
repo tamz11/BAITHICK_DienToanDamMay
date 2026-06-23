@@ -1,0 +1,248 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v22.14.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:E:\Project mau\baithick\.npmrc
+5 silly config load:file:E:\Project mau\baithick\appdata\npm\etc\npmrc
+6 verbose title npm install nodemailer@^7.0.13
+7 verbose argv "install" "nodemailer@^7.0.13" "--legacy-peer-deps" "--no-audit" "--no-fund"
+8 verbose logfile logs-max:10 dir:E:\Project mau\baithick\appdata_local\npm-cache\_logs\2026-06-23T15_39_41_449Z-
+9 verbose logfile E:\Project mau\baithick\appdata_local\npm-cache\_logs\2026-06-23T15_39_41_449Z-debug-0.log
+10 silly logfile start cleaning logs, removing 1 files
+11 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
+12 silly logfile done cleaning log files
+13 silly idealTree buildDeps
+14 silly fetch manifest nodemailer@^7.0.13
+15 silly packumentCache full:https://registry.npmjs.org/nodemailer cache-miss
+16 verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: node_modules/prisma
+17 http cache https://registry.npmjs.org/nodemailer 34ms (cache hit)
+18 silly packumentCache full:https://registry.npmjs.org/nodemailer set size:592755 disposed:false
+19 silly placeDep ROOT nodemailer@7.0.13 OK for: gocart@0.1.0 want: ^7.0.13
+20 silly reify mark retired [ 'E:\\Project mau\\baithick\\node_modules\\@types\\react' ]
+21 silly reify moves {
+21 silly reify   'E:\\Project mau\\baithick\\node_modules\\@types\\react': 'E:\\Project mau\\baithick\\node_modules\\@types\\.react-X5EE4IYh'
+21 silly reify }
+22 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-wasm32-wasi
+23 silly reify mark deleted [
+23 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-wasm32-wasi'
+23 silly reify ]
+24 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\lightningcss-win32-arm64-msvc
+25 silly reify mark deleted [
+25 silly reify   'E:\\Project mau\\baithick\\node_modules\\lightningcss-win32-arm64-msvc'
+25 silly reify ]
+26 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\lightningcss-linux-x64-musl
+27 silly reify mark deleted [
+27 silly reify   'E:\\Project mau\\baithick\\node_modules\\lightningcss-linux-x64-musl'
+27 silly reify ]
+28 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\lightningcss-linux-x64-gnu
+29 silly reify mark deleted [
+29 silly reify   'E:\\Project mau\\baithick\\node_modules\\lightningcss-linux-x64-gnu'
+29 silly reify ]
+30 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\lightningcss-linux-arm64-musl
+31 silly reify mark deleted [
+31 silly reify   'E:\\Project mau\\baithick\\node_modules\\lightningcss-linux-arm64-musl'
+31 silly reify ]
+32 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\lightningcss-linux-arm64-gnu
+33 silly reify mark deleted [
+33 silly reify   'E:\\Project mau\\baithick\\node_modules\\lightningcss-linux-arm64-gnu'
+33 silly reify ]
+34 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\lightningcss-linux-arm-gnueabihf
+35 silly reify mark deleted [
+35 silly reify   'E:\\Project mau\\baithick\\node_modules\\lightningcss-linux-arm-gnueabihf'
+35 silly reify ]
+36 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\lightningcss-freebsd-x64
+37 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\lightningcss-freebsd-x64' ]
+38 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\lightningcss-darwin-x64
+39 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\lightningcss-darwin-x64' ]
+40 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\lightningcss-darwin-arm64
+41 silly reify mark deleted [
+41 silly reify   'E:\\Project mau\\baithick\\node_modules\\lightningcss-darwin-arm64'
+41 silly reify ]
+42 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\fsevents
+43 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\fsevents' ]
+44 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-win32-arm64-msvc
+45 silly reify mark deleted [
+45 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-win32-arm64-msvc'
+45 silly reify ]
+46 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-linux-x64-musl
+47 silly reify mark deleted [
+47 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-linux-x64-musl'
+47 silly reify ]
+48 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-linux-x64-gnu
+49 silly reify mark deleted [
+49 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-linux-x64-gnu'
+49 silly reify ]
+50 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-linux-arm64-musl
+51 silly reify mark deleted [
+51 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-linux-arm64-musl'
+51 silly reify ]
+52 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-linux-arm64-gnu
+53 silly reify mark deleted [
+53 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-linux-arm64-gnu'
+53 silly reify ]
+54 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-linux-arm-gnueabihf
+55 silly reify mark deleted [
+55 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-linux-arm-gnueabihf'
+55 silly reify ]
+56 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-freebsd-x64
+57 silly reify mark deleted [
+57 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-freebsd-x64'
+57 silly reify ]
+58 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-darwin-x64
+59 silly reify mark deleted [
+59 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-darwin-x64'
+59 silly reify ]
+60 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-darwin-arm64
+61 silly reify mark deleted [
+61 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-darwin-arm64'
+61 silly reify ]
+62 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@tailwindcss\oxide-android-arm64
+63 silly reify mark deleted [
+63 silly reify   'E:\\Project mau\\baithick\\node_modules\\@tailwindcss\\oxide-android-arm64'
+63 silly reify ]
+64 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@next\swc-win32-arm64-msvc
+65 silly reify mark deleted [
+65 silly reify   'E:\\Project mau\\baithick\\node_modules\\@next\\swc-win32-arm64-msvc'
+65 silly reify ]
+66 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@next\swc-linux-x64-musl
+67 silly reify mark deleted [
+67 silly reify   'E:\\Project mau\\baithick\\node_modules\\@next\\swc-linux-x64-musl'
+67 silly reify ]
+68 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@next\swc-linux-x64-gnu
+69 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@next\\swc-linux-x64-gnu' ]
+70 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@next\swc-linux-arm64-musl
+71 silly reify mark deleted [
+71 silly reify   'E:\\Project mau\\baithick\\node_modules\\@next\\swc-linux-arm64-musl'
+71 silly reify ]
+72 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@next\swc-linux-arm64-gnu
+73 silly reify mark deleted [
+73 silly reify   'E:\\Project mau\\baithick\\node_modules\\@next\\swc-linux-arm64-gnu'
+73 silly reify ]
+74 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@next\swc-darwin-x64
+75 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@next\\swc-darwin-x64' ]
+76 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@next\swc-darwin-arm64
+77 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@next\\swc-darwin-arm64' ]
+78 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-win32-ia32
+79 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-win32-ia32' ]
+80 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-win32-arm64
+81 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-win32-arm64' ]
+82 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-wasm32
+83 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-wasm32' ]
+84 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-linuxmusl-x64
+85 silly reify mark deleted [
+85 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-linuxmusl-x64'
+85 silly reify ]
+86 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-linuxmusl-arm64
+87 silly reify mark deleted [
+87 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-linuxmusl-arm64'
+87 silly reify ]
+88 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-linux-x64
+89 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-linux-x64' ]
+90 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-linux-s390x
+91 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-linux-s390x' ]
+92 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-linux-ppc64
+93 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-linux-ppc64' ]
+94 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-linux-arm64
+95 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-linux-arm64' ]
+96 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-linux-arm
+97 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-linux-arm' ]
+98 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-libvips-linuxmusl-x64
+99 silly reify mark deleted [
+99 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-libvips-linuxmusl-x64'
+99 silly reify ]
+100 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-libvips-linuxmusl-arm64
+101 silly reify mark deleted [
+101 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-libvips-linuxmusl-arm64'
+101 silly reify ]
+102 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-libvips-linux-x64
+103 silly reify mark deleted [
+103 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-libvips-linux-x64'
+103 silly reify ]
+104 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-libvips-linux-s390x
+105 silly reify mark deleted [
+105 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-libvips-linux-s390x'
+105 silly reify ]
+106 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-libvips-linux-ppc64
+107 silly reify mark deleted [
+107 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-libvips-linux-ppc64'
+107 silly reify ]
+108 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-libvips-linux-arm64
+109 silly reify mark deleted [
+109 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-libvips-linux-arm64'
+109 silly reify ]
+110 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-libvips-linux-arm
+111 silly reify mark deleted [
+111 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-libvips-linux-arm'
+111 silly reify ]
+112 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-libvips-darwin-x64
+113 silly reify mark deleted [
+113 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-libvips-darwin-x64'
+113 silly reify ]
+114 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-libvips-darwin-arm64
+115 silly reify mark deleted [
+115 silly reify   'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-libvips-darwin-arm64'
+115 silly reify ]
+116 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-darwin-x64
+117 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-darwin-x64' ]
+118 verbose reify failed optional dependency E:\Project mau\baithick\node_modules\@img\sharp-darwin-arm64
+119 silly reify mark deleted [ 'E:\\Project mau\\baithick\\node_modules\\@img\\sharp-darwin-arm64' ]
+120 http cache nodemailer@https://registry.npmjs.org/nodemailer/-/nodemailer-7.0.13.tgz 0ms (cache hit)
+121 silly tarball no local data for nodemailer@https://registry.npmjs.org/nodemailer/-/nodemailer-7.0.13.tgz. Extracting by manifest.
+122 http fetch GET 200 https://registry.npmjs.org/nodemailer/-/nodemailer-7.0.13.tgz 487ms (cache miss)
+123 silly ADD node_modules/nodemailer
+124 silly ADD
+125 silly ADD
+126 silly ADD
+127 silly ADD
+128 silly ADD
+129 silly ADD
+130 silly ADD
+131 silly ADD
+132 silly ADD
+133 silly ADD
+134 silly ADD
+135 silly ADD
+136 silly ADD
+137 silly ADD
+138 silly ADD
+139 silly ADD
+140 silly ADD
+141 silly ADD
+142 silly ADD
+143 silly ADD
+144 silly ADD
+145 silly ADD
+146 silly ADD
+147 silly ADD
+148 silly ADD
+149 silly ADD
+150 silly ADD
+151 silly ADD
+152 silly ADD
+153 silly ADD
+154 silly ADD
+155 silly ADD
+156 silly ADD
+157 silly ADD
+158 silly ADD
+159 silly ADD
+160 silly ADD
+161 silly ADD
+162 silly ADD
+163 silly ADD
+164 silly ADD
+165 silly ADD
+166 silly ADD
+167 silly ADD
+168 silly ADD
+169 silly ADD
+170 silly ADD
+171 silly ADD
+172 silly ADD
+173 silly REMOVE node_modules/@types/react
+174 verbose cwd E:\Project mau\baithick
+175 verbose os Windows_NT 10.0.26200
+176 verbose node v22.14.0
+177 verbose npm  v10.9.2
+178 verbose exit 0
+179 info ok

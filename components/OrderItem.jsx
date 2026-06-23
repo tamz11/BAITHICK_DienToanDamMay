@@ -85,7 +85,7 @@ const OrderItem = ({ order, onConfirm }) => {
                                     <div className="mt-2">
                                         {ratings.find(rating => order.id === rating.orderId && item.product.id === rating.productId)
                                             ? <Rating value={ratings.find(rating => order.id === rating.orderId && item.product.id === rating.productId).rating} />
-                                            : order.status === 'DELIVERED' && (
+                                            : (order.status && String(order.status).toLowerCase().includes('deliver')) && (
                                                 <button
                                                     onClick={() => setRatingModal({ orderId: order.id, productId: item.product.id })}
                                                     className="text-xs font-bold text-emerald-600 hover:underline"
@@ -118,7 +118,7 @@ const OrderItem = ({ order, onConfirm }) => {
                     </div>
 
                     {/* NÚT XÁC NHẬN NHẬN HÀNG */}
-                    {order.status === 'SHIPPED' && (
+                    {order.status && String(order.status).toLowerCase().includes('ship') && (
                         <button
                             onClick={handleConfirmOrder}
                             disabled={confirming}

@@ -151,7 +151,8 @@ export default function ProfilePage() {
                 const couponsRes = await fetch('/api/coupons');
                 if (couponsRes.ok) {
                     const data = await couponsRes.json();
-                    setCoupons((data.coupons || []).filter((c) => new Date(c.expiresAt) > new Date()));
+                    const couponsData = data?.data || data?.coupons || [];
+                    setCoupons((couponsData || []).filter((c) => new Date(c.expiresAt) > new Date()));
                 } else {
                     setCoupons(couponDummyData.filter((coupon) => new Date(coupon.expiresAt) > new Date()));
                 }

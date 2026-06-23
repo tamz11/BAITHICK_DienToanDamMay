@@ -34,6 +34,24 @@ export async function POST(req) {
       where: { user: { email: session.user.email } },
     })
 
+    // Nếu mã có giới hạn dùng 1 lần (ví dụ ADMIN tạo mã NEW20), chặn khi người dùng đã dùng trước đó
+    const upperCode = code.toUpperCase();
+    if (upperCode === 'NEW20') {
+      // Tìm user và kiểm tra đơn hàng có sử dụng mã này chưa
+      const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+      if (user) {
+        const userOrders = await prisma.order.findMany({ where: { userId: user.id, isCouponUsed: true } });
+        const hasUsed = userOrders.some(o => {
+          try {
+            return o.coupon && o.coupon.code && String(o.coupon.code).toUpperCase() === upperCode;
+          } catch (e) { return false }
+        });
+        if (hasUsed) {
+          return new Response(JSON.stringify({ error: 'Mã này chỉ được sử dụng một lần cho mỗi khách hàng' }), { status: 400 });
+        }
+      }
+    }
+
     // Logic: forNewUser chỉ cho đơn đầu tiên (orderCount === 0)
     if (coupon.forNewUser && orderCount > 0) {
       return new Response(
