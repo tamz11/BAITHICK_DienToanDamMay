@@ -1,0 +1,24 @@
+'Log files:
+E:\Project mau\baithick\appdata_local\npm-cache\_logs\2026-06-23T15_39_24_218Z-debug-0.log
+
+# npm resolution error report
+
+While resolving: next-auth@4.24.14
+Found: nodemailer@6.10.1
+node_modules/nodemailer
+  optional nodemailer@"^6.9.3" from the root project
+
+Could not resolve dependency:
+peerOptional nodemailer@"^7.0.7" from next-auth@4.24.14
+node_modules/next-auth
+  next-auth@"^4.24.14" from the root project
+
+Conflicting peer dependency: nodemailer@7.0.13
+node_modules/nodemailer
+  peerOptional nodemailer@"^7.0.7" from next-auth@4.24.14
+  node_modules/next-auth
+    next-auth@"^4.24.14" from the root project
+
+Fix the upstream dependency conflict, or retry
+this command with --force or --legacy-peer-deps
+to accept an incorrect (and potentially broken) dependency resolution.

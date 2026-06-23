@@ -1,0 +1,71 @@
+0 verbose cli C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js
+1 info using npm@10.9.2
+2 info using node@v22.14.0
+3 silly config load:file:C:\Program Files\nodejs\node_modules\npm\npmrc
+4 silly config load:file:E:\Project mau\baithick\.npmrc
+5 silly config load:file:E:\Project mau\baithick\appdata\npm\etc\npmrc
+6 verbose title npm install nodemailer@^6.9.3
+7 verbose argv "install" "nodemailer@^6.9.3" "--no-audit" "--no-fund"
+8 verbose logfile logs-max:10 dir:E:\Project mau\baithick\appdata_local\npm-cache\_logs\2026-06-23T15_39_24_218Z-
+9 verbose logfile E:\Project mau\baithick\appdata_local\npm-cache\_logs\2026-06-23T15_39_24_218Z-debug-0.log
+10 silly logfile start cleaning logs, removing 1 files
+11 silly packumentCache heap:2197815296 maxSize:549453824 maxEntrySize:274726912
+12 silly logfile done cleaning log files
+13 silly idealTree buildDeps
+14 silly fetch manifest nodemailer@^6.9.3
+15 silly packumentCache full:https://registry.npmjs.org/nodemailer cache-miss
+16 verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: node_modules/prisma
+17 http fetch GET 200 https://registry.npmjs.org/nodemailer 308ms (cache miss)
+18 silly packumentCache full:https://registry.npmjs.org/nodemailer set size:undefined disposed:false
+19 silly placeDep ROOT nodemailer@6.10.1 OK for: gocart@0.1.0 want: ^6.9.3
+20 silly fetch manifest nodemailer@^7.0.7
+21 silly packumentCache full:https://registry.npmjs.org/nodemailer cache-miss
+22 http cache https://registry.npmjs.org/nodemailer 12ms (cache hit)
+23 silly packumentCache full:https://registry.npmjs.org/nodemailer set size:592755 disposed:false
+24 verbose stack Error: could not resolve
+24 verbose stack     at PlaceDep.failPeerConflict (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\place-dep.js:503:25)
+24 verbose stack     at new PlaceDep (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\place-dep.js:157:21)
+24 verbose stack     at #buildDepStep (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:920:18)
+24 verbose stack     at async Arborist.buildIdealTree (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\build-ideal-tree.js:181:7)
+24 verbose stack     at async Promise.all (index 1)
+24 verbose stack     at async Arborist.reify (C:\Program Files\nodejs\node_modules\npm\node_modules\@npmcli\arborist\lib\arborist\reify.js:131:5)
+24 verbose stack     at async Install.exec (C:\Program Files\nodejs\node_modules\npm\lib\commands\install.js:150:5)
+24 verbose stack     at async Npm.exec (C:\Program Files\nodejs\node_modules\npm\lib\npm.js:207:9)
+24 verbose stack     at async module.exports (C:\Program Files\nodejs\node_modules\npm\lib\cli\entry.js:74:5)
+25 error code ERESOLVE
+26 error ERESOLVE could not resolve
+27 error
+28 error While resolving: next-auth@4.24.14
+28 error Found: nodemailer@6.10.1[2m[22m
+28 error [2mnode_modules/nodemailer[22m
+28 error   [35moptional[39m nodemailer@"^6.9.3" from the root project
+28 error
+28 error Could not resolve dependency:
+28 error peerOptional nodemailer@"^7.0.7" from next-auth@4.24.14[2m[22m
+28 error [2mnode_modules/next-auth[22m
+28 error   next-auth@"^4.24.14" from the root project
+28 error
+28 error Conflicting peer dependency: nodemailer@7.0.13[2m[22m
+28 error [2mnode_modules/nodemailer[22m
+28 error   peerOptional nodemailer@"^7.0.7" from next-auth@4.24.14[2m[22m
+28 error   [2mnode_modules/next-auth[22m
+28 error     next-auth@"^4.24.14" from the root project
+28 error
+28 error Fix the upstream dependency conflict, or retry
+28 error this command with --force or --legacy-peer-deps
+28 error to accept an incorrect (and potentially broken) dependency resolution.
+29 error
+29 error
+29 error For a full report see:
+29 error E:\Project mau\baithick\appdata_local\npm-cache\_logs\2026-06-23T15_39_24_218Z-eresolve-report.txt
+30 silly unfinished npm timer reify 1782229166252
+31 silly unfinished npm timer reify:loadTrees 1782229166253
+32 silly unfinished npm timer idealTree:buildDeps 1782229166346
+33 silly unfinished npm timer idealTree:node_modules/next-auth 1782229166672
+34 verbose cwd E:\Project mau\baithick
+35 verbose os Windows_NT 10.0.26200
+36 verbose node v22.14.0
+37 verbose npm  v10.9.2
+38 verbose exit 1
+39 verbose code 1
+40 error A complete log of this run can be found in: E:\Project mau\baithick\appdata_local\npm-cache\_logs\2026-06-23T15_39_24_218Z-debug-0.log

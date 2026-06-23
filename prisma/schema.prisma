@@ -10,22 +10,22 @@ datasource db {
 }
 
 model User {
-  id          String    @id
-  name        String
-  email       String    @unique
-  password    String
-  image       String    @default("")
-  phone       String    @default("")
-  ewallet     String    @default("")
-  defaultAddressId String? @unique
+  id               String    @id
+  name             String
+  email            String    @unique
+  password         String
+  image            String    @default("")
+  role             Role      @default(CUSTOMER)
+  cart             Json
+  isActive         Boolean   @default(true)
+  ewallet          String    @default("")
+  phone            String    @default("")
+  defaultAddressId String?   @unique
+  Address          Address[]
+  buyerOrders      Order[]   @relation("BuyerRelation")
+  ratings          Rating[]
+  store            Store?
   defaultAddress   Address?  @relation("UserDefaultAddress", fields: [defaultAddressId], references: [id])
-  role        Role      @default(CUSTOMER)
-  cart        Json
-  isActive    Boolean   @default(true)
-  Address     Address[]
-  buyerOrders Order[]   @relation("BuyerRelation")
-  ratings     Rating[]
-  store       Store?
 }
 
 model Category {
@@ -108,20 +108,20 @@ model Rating {
 }
 
 model Address {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  email     String
-  street    String
-  city      String
-  state     String
-  zip       String
-  country   String
-  phone     String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  defaultForUser User?   @relation("UserDefaultAddress")
-  Order     Order[]
+  id             String   @id @default(cuid())
+  userId         String
+  name           String
+  email          String
+  street         String
+  city           String
+  state          String
+  zip            String
+  country        String
+  phone          String
+  createdAt      DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Order          Order[]
+  defaultForUser User?    @relation("UserDefaultAddress")
 
   @@index([userId], map: "Address_userId_fkey")
 }
