@@ -73,6 +73,10 @@ export default function ProfilePage() {
         if (status === 'authenticated') fetchProfile()
     }, [status])
 
+    // Derived values to avoid runtime reference errors during render
+    const totalOrders = orders.length || 0;
+    const activeCoupons = (coupons || []).length || 0;
+
     useEffect(() => {
         const fetchAddresses = async () => {
             try {
