@@ -93,7 +93,7 @@ export async function POST(req) {
         if (!store) return NextResponse.json({ error: "Thiếu bản ghi Store" }, { status: 404 });
 
         // 🛡️ 3. Kiểm tra trạng thái duyệt của Cửa hàng (Chặn lỗi nghiệp vụ)
-        if (store.status !== "APPROVED") {
+        if (store.status?.toUpperCase() !== "APPROVED") {
             return NextResponse.json(
                 { error: "Cửa hàng của bạn đang chờ Admin phê duyệt. Vui lòng quay lại sau khi được kích hoạt!" }, 
                 { status: 403 }
